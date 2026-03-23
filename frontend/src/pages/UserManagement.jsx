@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchUsers, createUser, updateUser, deleteUser } from '../api/userApi';
 import Sidebar from '../components/Sidebar';
-import FilterDrawer from '../components/FilterDrawer'; // <-- Added import for your new professional filter
+import FilterDrawer from '../components/FilterDrawer';
 import '../styles/Web.css';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   
-  // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterBar, setShowFilterBar] = useState(false);
   
-  // 1. Added Filter States
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [selectedAccess, setSelectedAccess] = useState([]);
   
@@ -34,17 +32,13 @@ const UserManagement = () => {
     }
   };
 
-  // 2. Master Filtering Logic (Replaces the old filteredUsers state)
   const filteredUsers = users.filter(user => {
-    // Search match
     const matchSearch = search === '' || 
-      user.name.toLowerCase().includes(search.toLowerCase()) || 
-      user.email.toLowerCase().includes(search.toLowerCase());
+      (user.name || '').toLowerCase().includes(search.toLowerCase()) || 
+      (user.email || '').toLowerCase().includes(search.toLowerCase());
       
-    // Role match
     const matchRole = selectedRoles.length === 0 || selectedRoles.includes(user.role);
     
-    // Access match (Adapted to check your specific {ventes: true/false} object structure)
     const matchAccess = selectedAccess.length === 0 || selectedAccess.some(acc => {
       const key = acc.toLowerCase();
       return user.access && user.access[key] === true;
@@ -62,26 +56,38 @@ const UserManagement = () => {
     };
   }, [users]);
 
-  // Fonction pour donner une couleur aléatoire aux initiales comme dans la photo 1
+  // Correction ici : protection contre name undefined / null / vide
   const getAvatarStyle = (name) => {
+    const safeName = (name || '').trim();
+    const firstChar = safeName.length > 0 ? safeName[0] : 'U'; // fallback 'U' ou '?' selon votre préférence
+
     const colors = [
-      { bg: '#F59E0B', color: '#FFF' }, // Jaune
-      { bg: '#8B5CF6', color: '#FFF' }, // Violet
-      { bg: '#3B82F6', color: '#FFF' }, // Bleu
-      { bg: '#10B981', color: '#FFF' }, // Vert
+      { bg: '#F59E0B', color: '#FFF' },
+      { bg: '#8B5CF6', color: '#FFF' },
+      { bg: '#3B82F6', color: '#FFF' },
+      { bg: '#10B981', color: '#FFF' },
     ];
-    const charCode = name.charCodeAt(0) || 0;
+
+    const charCode = firstChar.charCodeAt(0);
     const theme = colors[charCode % colors.length];
+
     return {
-      width: '36px', height: '36px', borderRadius: '50%',
-      background: theme.bg, color: theme.color,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontWeight: 'bold', fontSize: '14px'
+      width: '36px',
+      height: '36px',
+      borderRadius: '50%',
+      background: theme.bg,
+      color: theme.color,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      fontSize: '14px'
     };
   };
 
   const handleExportExcel = () => {
-    const csvContent = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE,RÔLE\n" + filteredUsers.map(e => `${e.name},${e.email},${e.phone},${e.role}`).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE,RÔLE\n" + 
+      filteredUsers.map(e => `${e.name || ''},${e.email || ''},${e.phone || ''},${e.role || ''}`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -111,10 +117,18 @@ const UserManagement = () => {
   };
 
   const openEditModal = (user) => { setCurrentUser(user); setFormData(user); setShowModal(true); };
-  const openAddModal = () => { setCurrentUser(null); setFormData({ name: '', email: '', phone: '', role: 'Employé', photo: '', access: { ventes: false, achats: false, stocks: false, production: false } }); setShowModal(true); };
-  const confirmDelete = async () => { await deleteUser(currentUser._id); setShowDeleteModal(false); loadUsers(); };
+  const openAddModal = () => { 
+    setCurrentUser(null); 
+    setFormData({ name: '', email: '', phone: '', role: 'Employé', photo: '', access: { ventes: false, achats: false, stocks: false, production: false } }); 
+    setShowModal(true); 
+  };
+  const confirmDelete = async () => { 
+    await deleteUser(currentUser._id); 
+    setShowDeleteModal(false); 
+    loadUsers(); 
+  };
 
-  // SVG Icons
+  // SVG Icons (inchangés)
   const Icons = {
     Search: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
     Bell: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>,
@@ -137,7 +151,6 @@ const UserManagement = () => {
       <Sidebar />
       <div className="main-content">
         
-        {/* TOP NAVBAR */}
         <div className="top-navbar">
           <div className="search-container">
             <Icons.Search />
@@ -156,14 +169,12 @@ const UserManagement = () => {
           </div>
         </div>
 
-        {/* PAGE CONTENT */}
         <div className="page-container">
           <div className="page-header">
             <h1>Gestion des utilisateurs</h1>
             <p>Gérez les accès et permissions des utilisateurs de la plateforme.</p>
           </div>
 
-          {/* STATS CARDS MATCHING PHOTO 1 */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-info">
@@ -202,7 +213,6 @@ const UserManagement = () => {
             </div>
           </div>
 
-          {/* ACTION ROW */}
           <div className="actions-row">
             <button className="btn-primary" onClick={openAddModal}>
               <Icons.Plus /> Ajouter utilisateur
@@ -215,7 +225,6 @@ const UserManagement = () => {
             </button>
           </div>
 
-          {/* TABLE */}
           <div className="table-container">
             <table>
               <thead>
@@ -233,19 +242,30 @@ const UserManagement = () => {
                 {filteredUsers.map(user => (
                   <tr key={user._id}>
                     <td>
-                      {user.photo ? <img src={user.photo} alt="profile" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} /> : 
-                      <div style={getAvatarStyle(user.name)}>
-                        {user.name.substring(0,2).toUpperCase()}
-                      </div>}
+                      {user.photo ? (
+                        <img 
+                          src={user.photo} 
+                          alt="profile" 
+                          style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
+                        />
+                      ) : (
+                        <div style={getAvatarStyle(user.name)}>
+                          {(user.name || '??').substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
                     </td>
-                    <td><strong>{user.name}</strong></td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td><span className={`badge role-${user.role}`}>{user.role}</span></td>
+                    <td><strong>{user.name || '-'}</strong></td>
+                    <td>{user.email || '-'}</td>
+                    <td>{user.phone || '-'}</td>
+                    <td><span className={`badge role-${user.role}`}>{user.role || '-'}</span></td>
                     <td>
-                      {Object.keys(user.access).map(acc => user.access[acc] ? (
-                        <span key={acc} className={`badge access-badge ${acc}`}>{acc.charAt(0).toUpperCase() + acc.slice(1)}</span>
-                      ) : null)}
+                      {Object.keys(user.access || {}).map(acc => 
+                        user.access[acc] ? (
+                          <span key={acc} className={`badge access-badge ${acc}`}>
+                            {acc.charAt(0).toUpperCase() + acc.slice(1)}
+                          </span>
+                        ) : null
+                      )}
                     </td>
                     <td>
                       <button className="action-btn" onClick={() => openEditModal(user)}><Icons.Edit /></button>
@@ -259,25 +279,64 @@ const UserManagement = () => {
 
         </div>
 
-        {/* MODAL: ADD / EDIT */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 style={{ marginTop: 0, color: '#0F2038' }}>{currentUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}</h2>
+              <h2 style={{ marginTop: 0, color: '#0F2038' }}>
+                {currentUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
+              </h2>
               <form onSubmit={handleSaveUser}>
                 <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  {formData.photo ? <img src={formData.photo} alt="Preview" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} /> :
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#F4F7FA' }}></div>}
+                  {formData.photo ? (
+                    <img 
+                      src={formData.photo} 
+                      alt="Preview" 
+                      style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#F4F7FA' }}></div>
+                  )}
                   <input type="file" accept="image/*" onChange={handlePhotoUpload} />
                 </div>
-                <div className="form-group"><label>Nom complet</label><input type="text" className="form-control" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+                <div className="form-group">
+                  <label>Nom complet</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    value={formData.name} 
+                    onChange={e => setFormData({...formData, name: e.target.value})} 
+                    required 
+                  />
+                </div>
                 <div style={{ display: 'flex', gap: '20px' }}>
-                  <div className="form-group" style={{ flex: 1 }}><label>Email</label><input type="email" className="form-control" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-                  <div className="form-group" style={{ flex: 1 }}><label>Téléphone</label><input type="text" className="form-control" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required /></div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Email</label>
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      value={formData.email} 
+                      onChange={e => setFormData({...formData, email: e.target.value})} 
+                      required 
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>Téléphone</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={formData.phone} 
+                      onChange={e => setFormData({...formData, phone: e.target.value})} 
+                      required 
+                    />
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Rôle</label>
-                  <select className="form-control" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                  <select 
+                    className="form-control" 
+                    value={formData.role} 
+                    onChange={e => setFormData({...formData, role: e.target.value})}
+                  >
                     <option value="Admin">Admin</option>
                     <option value="Manager">Manager</option>
                     <option value="Employé">Employé</option>
@@ -287,38 +346,82 @@ const UserManagement = () => {
                   <label>Accès aux dashboards</label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     {['ventes', 'achats', 'stocks', 'production'].map(acc => (
-                      <label key={acc} style={{ background: '#F4F7FA', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'normal' }}>
-                        <input type="checkbox" checked={formData.access[acc]} onChange={e => setFormData({...formData, access: {...formData.access, [acc]: e.target.checked}})} />
+                      <label 
+                        key={acc} 
+                        style={{ 
+                          background: '#F4F7FA', 
+                          padding: '12px', 
+                          borderRadius: '12px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '10px', 
+                          cursor: 'pointer', 
+                          fontWeight: 'normal' 
+                        }}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={formData.access[acc]} 
+                          onChange={e => setFormData({
+                            ...formData, 
+                            access: { ...formData.access, [acc]: e.target.checked }
+                          })} 
+                        />
                         {acc.charAt(0).toUpperCase() + acc.slice(1)}
                       </label>
                     ))}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
-                  <button type="button" className="btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setShowModal(false)}>Annuler</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 1, justifyContent: 'center' }}>{currentUser ? 'Mettre à jour' : 'Enregistrer'}</button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    style={{ flex: 1, justifyContent: 'center' }} 
+                    onClick={() => setShowModal(false)}
+                  >
+                    Annuler
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary" 
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    {currentUser ? 'Mettre à jour' : 'Enregistrer'}
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* MODAL: DELETE */}
         {showDeleteModal && (
           <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2 style={{ color: '#EF4444', marginTop: 0 }}>Confirmer la suppression</h2>
-              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name}</strong> ?</p>
-              <p style={{ color: '#828282', fontSize: '14px' }}>Cette action est irréversible et supprimera toutes les données associées à cet utilisateur.</p>
+              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name || 'cet utilisateur'}</strong> ?</p>
+              <p style={{ color: '#828282', fontSize: '14px' }}>
+                Cette action est irréversible et supprimera toutes les données associées à cet utilisateur.
+              </p>
               <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
-                <button className="btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setShowDeleteModal(false)}>Annuler</button>
-                <button className="btn-primary" style={{ flex: 1, justifyContent: 'center', backgroundColor: '#EF4444' }} onClick={confirmDelete}>Supprimer</button>
+                <button 
+                  className="btn-secondary" 
+                  style={{ flex: 1, justifyContent: 'center' }} 
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Annuler
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ flex: 1, justifyContent: 'center', backgroundColor: '#EF4444' }} 
+                  onClick={confirmDelete}
+                >
+                  Supprimer
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* 4. Filter Drawer Component */}
         {showFilterBar && (
           <FilterDrawer 
             onClose={() => setShowFilterBar(false)} 
