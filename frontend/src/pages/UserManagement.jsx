@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { fetchUsers, createUser, updateUser, deleteUser } from '../api/userApi';
 import Sidebar from '../components/Sidebar';
 import FilterDrawer from '../components/FilterDrawer';
+import Chatbot from '../components/Chatbot';
+
 import '../styles/Web.css';
 
 const UserManagement = () => {
@@ -149,6 +151,7 @@ const UserManagement = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
+      <Chatbot />
       <div className="main-content">
         
         <div className="top-navbar">

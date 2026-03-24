@@ -1,23 +1,27 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const connectDB = require("./config/db");
-
-const userRoutes = require('./routes/userRoutes');
+const connectDB = require('./config/db');
 
 const app = express();
 
-// Middleware
-app.use(cors());
-// Limit increased for Base64 photo uploads
-app.use(bodyParser.json({ limit: '10mb' })); 
+// ── Middlewares ──
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
+// Limite augmentée pour les photos Base64
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// Routes
-app.use('/api/users', userRoutes);
+// ── Routes ──
+app.use('/api/auth',  require('./routes/auth'));
+app.use('/api/users', require('./routes/userRoutes'));
 
+app.get('/', (req, res) => res.send('Thermivent BI API running'));
+
+// ── Connexion DB + Démarrage ──
 connectDB();
 
 const PORT = process.env.PORT || 5000;

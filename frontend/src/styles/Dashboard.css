@@ -1,0 +1,146 @@
+/* ════════════════════════════════════════
+   DASHBOARD.CSS — Styles partagés dashboards
+   Ventes / Achats / Stock / Production
+════════════════════════════════════════ */
+
+.page-container { padding: 30px 40px; }
+
+.page-header { margin-bottom: 30px; }
+.page-header h1 { margin: 0; color: #0e1930; font-size: 28px; font-weight: 700; }
+.page-header p  { margin: 5px 0 0 0; color: #64748B; font-size: 15px; }
+
+/* ── Top Navbar identique à UserManagement ── */
+.top-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E2E8F0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.search-container { position: relative; width: 350px; }
+.search-container svg {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8; width: 16px; height: 20px;
+}
+.search-input {
+  width: 100%; padding: 10px 10px 10px 36px;
+  border-radius: 8px; border: 1px solid transparent;
+  background-color: #F1F5F9; color: #0F172A;
+  font-size: 15px; box-sizing: border-box;
+  outline: none; transition: border 0.2s;
+}
+.search-input:focus { border: 1px solid #3B82F6; background-color: #FFFFFF; }
+
+.top-right { display: flex; align-items: center; gap: 20px; }
+
+.bell-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #F1F5F9; display: flex;
+  align-items: center; justify-content: center;
+  color: #64748B; cursor: pointer;
+  transition: background 0.2s;
+}
+.bell-icon:hover { background: #E2E8F0; }
+
+.user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.user-profile img { width: 36px; height: 36px; border-radius: 50%; }
+.user-info p    { margin: 0; font-size: 14px; font-weight: 600; color: #0F2038; }
+.user-info span { margin: 0; font-size: 12px; color: #64748B; display: block; }
+
+/* ── Placeholder Power BI ── */
+.powerbi-section {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.powerbi-header {
+  padding: 20px 28px;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.powerbi-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0e1930;
+}
+
+.powerbi-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: #EFF6FF; color: #2563EB;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+
+.powerbi-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%; background: #2563EB;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.powerbi-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  background: #FAFBFC;
+  gap: 16px;
+}
+
+.powerbi-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.powerbi-body h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0e1930;
+}
+
+.powerbi-body p {
+  margin: 0;
+  font-size: 14px;
+  color: #94A3B8;
+  text-align: center;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+.powerbi-iframe-placeholder {
+  width: 100%;
+  border: none;
+  min-height: 600px;
+}
+
+/* ── Couleurs par module ── */
+.icon-ventes     { background: #D1FAE5; }
+.icon-achats     { background: #DBEAFE; }
+.icon-stock      { background: #FFEDD5; }
+.icon-production { background: #F3E8FF; }
