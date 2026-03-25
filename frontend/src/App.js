@@ -8,7 +8,7 @@ import PurchasesDashboard from './pages/PurchasesDashboard';
 import StockDashboard from './pages/StockDashboard';
 import ProductionDashboard from './pages/ProductionDashboard';
 import UserManagement from './pages/UserManagement';
-
+import Rapports from './pages/Rapports';        // ← Nouveau import
 
 const RouteProtegee = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -22,10 +22,12 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
 
+        {/* Dashboard par défaut (actuellement redirigé vers Ventes) */}
         <Route
           path="/dashboard"
-          element={<RouteProtegee><SalesDashboard /></RouteProtegee>}   // tu peux choisir la page par défaut
+          element={<RouteProtegee><SalesDashboard /></RouteProtegee>}
         />
+
         <Route
           path="/ventes"
           element={<RouteProtegee><SalesDashboard /></RouteProtegee>}
@@ -42,12 +44,20 @@ function App() {
           path="/production"
           element={<RouteProtegee><ProductionDashboard /></RouteProtegee>}
         />
+
+        {/* Gestion des utilisateurs */}
         <Route
           path="/users"
           element={<RouteProtegee><UserManagement /></RouteProtegee>}
         />
-        
-    
+
+        {/* Nouvelle page Rapports */}
+        <Route
+          path="/rapports"
+          element={<RouteProtegee><Rapports /></RouteProtegee>}
+        />
+
+        {/* Route par défaut pour les URLs inconnues */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

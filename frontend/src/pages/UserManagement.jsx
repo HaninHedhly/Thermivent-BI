@@ -1,3 +1,4 @@
+// src/pages/UserManagement.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { fetchUsers, createUser, updateUser, deleteUser } from '../api/userApi';
 import Sidebar from '../components/Sidebar';
@@ -19,7 +20,11 @@ const UserManagement = () => {
   
   const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', role: 'Employé', photo: '',
+    name: '', 
+    email: '', 
+    phone: '', 
+    role: 'Employé', 
+    photo: '',
     access: { ventes: false, achats: false, stocks: false, production: false }
   });
 
@@ -58,10 +63,9 @@ const UserManagement = () => {
     };
   }, [users]);
 
-  // Correction ici : protection contre name undefined / null / vide
   const getAvatarStyle = (name) => {
     const safeName = (name || '').trim();
-    const firstChar = safeName.length > 0 ? safeName[0] : 'U'; // fallback 'U' ou '?' selon votre préférence
+    const firstChar = safeName.length > 0 ? safeName[0] : 'U';
 
     const colors = [
       { bg: '#F59E0B', color: '#FFF' },
@@ -118,24 +122,31 @@ const UserManagement = () => {
     }
   };
 
-  const openEditModal = (user) => { setCurrentUser(user); setFormData(user); setShowModal(true); };
-  const openAddModal = () => { 
-    setCurrentUser(null); 
-    setFormData({ name: '', email: '', phone: '', role: 'Employé', photo: '', access: { ventes: false, achats: false, stocks: false, production: false } }); 
+  const openEditModal = (user) => { 
+    setCurrentUser(user); 
+    setFormData(user); 
     setShowModal(true); 
   };
+
+  const openAddModal = () => { 
+    setCurrentUser(null); 
+    setFormData({ 
+      name: '', email: '', phone: '', role: 'Employé', photo: '', 
+      access: { ventes: false, achats: false, stocks: false, production: false } 
+    }); 
+    setShowModal(true); 
+  };
+
   const confirmDelete = async () => { 
     await deleteUser(currentUser._id); 
     setShowDeleteModal(false); 
     loadUsers(); 
   };
 
-  // SVG Icons (inchangés)
   const Icons = {
     Search: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
     Bell: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>,
     Plus: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-    Upload: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
     Excel: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
     Filter: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>,
     Edit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
@@ -152,18 +163,29 @@ const UserManagement = () => {
     <div className="dashboard-layout">
       <Sidebar />
       <Chatbot />
+
       <div className="main-content">
-        
+        {/* Top Navbar */}
         <div className="top-navbar">
           <div className="search-container">
             <Icons.Search />
-            <input type="text" placeholder="Rechercher un utilisateur..." className="search-input" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input 
+              type="text" 
+              placeholder="Rechercher un utilisateur..." 
+              className="search-input" 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+            />
           </div>
           
           <div className="top-right">
             <div className="bell-icon"><Icons.Bell /></div>
             <div className="user-profile">
-              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+              <img 
+                src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" 
+                alt="User" 
+                style={{ width: '36px', height: '36px', borderRadius: '50%' }} 
+              />
               <div className="user-info">
                 <p>Admin User</p>
                 <span>admin@company.tn</span>
@@ -178,6 +200,7 @@ const UserManagement = () => {
             <p>Gérez les accès et permissions des utilisateurs de la plateforme.</p>
           </div>
 
+          {/* Stats Cards */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-info">
@@ -216,18 +239,67 @@ const UserManagement = () => {
             </div>
           </div>
 
-          <div className="actions-row">
-            <button className="btn-primary" onClick={openAddModal}>
+          {/* Action Buttons - Style moderne comme Rapports */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', flexWrap: 'wrap' }}>
+            <button 
+              onClick={openAddModal}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '9999px',
+                background: '#0F2038',
+                color: 'white',
+                border: 'none',
+                fontWeight: '600',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <Icons.Plus /> Ajouter utilisateur
             </button>
-            <button className="btn-secondary" onClick={handleExportExcel}>
+
+            <button 
+              onClick={handleExportExcel}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '9999px',
+                background: '#F1F5F9',
+                color: '#334155',
+                border: 'none',
+                fontWeight: '600',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <Icons.Excel /> Exporter Excel
             </button>
-            <button className="btn-secondary" onClick={() => setShowFilterBar(true)}>
+
+            <button 
+              onClick={() => setShowFilterBar(true)}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '9999px',
+                background: '#F1F5F9',
+                color: '#334155',
+                border: 'none',
+                fontWeight: '600',
+                fontSize: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
               <Icons.Filter /> Filtrer
             </button>
           </div>
 
+          {/* Table */}
           <div className="table-container">
             <table>
               <thead>
@@ -246,11 +318,7 @@ const UserManagement = () => {
                   <tr key={user._id}>
                     <td>
                       {user.photo ? (
-                        <img 
-                          src={user.photo} 
-                          alt="profile" 
-                          style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
-                        />
+                        <img src={user.photo} alt="profile" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
                       ) : (
                         <div style={getAvatarStyle(user.name)}>
                           {(user.name || '??').substring(0, 2).toUpperCase()}
@@ -279,87 +347,173 @@ const UserManagement = () => {
               </tbody>
             </table>
           </div>
-
         </div>
 
+        {/* ====================== MODAL FINAL - PHOTO CENTRÉE + FENÊTRE FLOATING ====================== */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 style={{ marginTop: 0, color: '#0F2038' }}>
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '540px',
+                maxWidth: '95%',
+                background: 'white',
+                borderRadius: '28px',
+                boxShadow: '0 35px 80px -20px rgba(15, 32, 56, 0.35)',
+                padding: '45px 40px 40px',
+                margin: '20px auto'
+              }}
+            >
+              <h2 style={{ 
+                margin: '0 0 40px 0', 
+                color: '#0F2038', 
+                fontSize: '29px', 
+                fontWeight: '700',
+                textAlign: 'center'
+              }}>
                 {currentUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
               </h2>
+
               <form onSubmit={handleSaveUser}>
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  {formData.photo ? (
-                    <img 
-                      src={formData.photo} 
-                      alt="Preview" 
-                      style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} 
-                    />
-                  ) : (
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#F4F7FA' }}></div>
-                  )}
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+                {/* Photo centrée */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '35px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    {formData.photo ? (
+                      <img 
+                        src={formData.photo} 
+                        alt="Preview" 
+                        style={{ 
+                          width: '120px', 
+                          height: '120px', 
+                          borderRadius: '50%', 
+                          objectFit: 'cover',
+                          border: '6px solid #F1F5F9',
+                          boxShadow: '0 10px 30px rgba(0,0,0,0.12)'
+                        }} 
+                      />
+                    ) : (
+                      <div style={{ 
+                        width: '120px', 
+                        height: '120px', 
+                        borderRadius: '50%', 
+                        background: '#F8FAFC',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '6px solid #F1F5F9',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.12)'
+                      }}>
+                        <span style={{ fontSize: '54px', color: '#94A3B8' }}>👤</span>
+                      </div>
+                    )}
+                    <div style={{ marginTop: '16px' }}>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handlePhotoUpload}
+                        style={{ fontSize: '14px', color: '#64748B' }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Nom complet</label>
+
+                {/* Nom complet */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '8px' }}>Nom complet</label>
                   <input 
                     type="text" 
-                    className="form-control" 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
                     required 
+                    style={{ 
+                      width: '100%', 
+                      padding: '15px 18px', 
+                      fontSize: '16px',
+                      border: '1.5px solid #E2E8F0',
+                      borderRadius: '14px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>Email</label>
+
+                {/* Email + Téléphone */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '8px' }}>Email</label>
                     <input 
                       type="email" 
-                      className="form-control" 
                       value={formData.email} 
                       onChange={e => setFormData({...formData, email: e.target.value})} 
                       required 
+                      style={{ 
+                        width: '100%', 
+                        padding: '15px 18px', 
+                        fontSize: '16px',
+                        border: '1.5px solid #E2E8F0',
+                        borderRadius: '14px',
+                        outline: 'none'
+                      }}
                     />
                   </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>Téléphone</label>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '8px' }}>Téléphone</label>
                     <input 
                       type="text" 
-                      className="form-control" 
                       value={formData.phone} 
                       onChange={e => setFormData({...formData, phone: e.target.value})} 
                       required 
+                      style={{ 
+                        width: '100%', 
+                        padding: '15px 18px', 
+                        fontSize: '16px',
+                        border: '1.5px solid #E2E8F0',
+                        borderRadius: '14px',
+                        outline: 'none'
+                      }}
                     />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Rôle</label>
+
+                {/* Rôle */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '8px' }}>Rôle</label>
                   <select 
-                    className="form-control" 
                     value={formData.role} 
                     onChange={e => setFormData({...formData, role: e.target.value})}
+                    style={{ 
+                      width: '100%', 
+                      padding: '15px 18px', 
+                      fontSize: '16px',
+                      border: '1.5px solid #E2E8F0',
+                      borderRadius: '14px',
+                      outline: 'none',
+                      background: 'white'
+                    }}
                   >
                     <option value="Admin">Admin</option>
                     <option value="Manager">Manager</option>
                     <option value="Employé">Employé</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label>Accès aux dashboards</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+
+                {/* Accès aux dashboards */}
+                <div style={{ marginBottom: '32px' }}>
+                  <label style={{ display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '12px' }}>
+                    Accès aux dashboards
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     {['ventes', 'achats', 'stocks', 'production'].map(acc => (
                       <label 
-                        key={acc} 
+                        key={acc}
                         style={{ 
-                          background: '#F4F7FA', 
-                          padding: '12px', 
-                          borderRadius: '12px', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '10px', 
-                          cursor: 'pointer', 
-                          fontWeight: 'normal' 
+                          background: '#F8FAFC',
+                          padding: '14px 18px',
+                          borderRadius: '14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          border: '1.5px solid #E2E8F0'
                         }}
                       >
                         <input 
@@ -369,25 +523,47 @@ const UserManagement = () => {
                             ...formData, 
                             access: { ...formData.access, [acc]: e.target.checked }
                           })} 
+                          style={{ width: '18px', height: '18px', accentColor: '#0F2038' }}
                         />
-                        {acc.charAt(0).toUpperCase() + acc.slice(1)}
+                        <span style={{ fontWeight: '500' }}>
+                          {acc.charAt(0).toUpperCase() + acc.slice(1)}
+                        </span>
                       </label>
                     ))}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
+
+                {/* Boutons */}
+                <div style={{ display: 'flex', gap: '16px' }}>
                   <button 
                     type="button" 
-                    className="btn-secondary" 
-                    style={{ flex: 1, justifyContent: 'center' }} 
                     onClick={() => setShowModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '16px',
+                      borderRadius: '14px',
+                      border: '1.5px solid #E2E8F0',
+                      background: 'white',
+                      fontWeight: '600',
+                      fontSize: '15.5px',
+                      cursor: 'pointer'
+                    }}
                   >
                     Annuler
                   </button>
                   <button 
-                    type="submit" 
-                    className="btn-primary" 
-                    style={{ flex: 1, justifyContent: 'center' }}
+                    type="submit"
+                    style={{
+                      flex: 1,
+                      padding: '16px',
+                      borderRadius: '14px',
+                      border: 'none',
+                      background: '#0F2038',
+                      color: 'white',
+                      fontWeight: '600',
+                      fontSize: '15.5px',
+                      cursor: 'pointer'
+                    }}
                   >
                     {currentUser ? 'Mettre à jour' : 'Enregistrer'}
                   </button>
@@ -397,6 +573,7 @@ const UserManagement = () => {
           </div>
         )}
 
+        {/* Modal Suppression */}
         {showDeleteModal && (
           <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -434,7 +611,6 @@ const UserManagement = () => {
             setSelectedAccess={setSelectedAccess}
           />
         )}
-
       </div>
     </div>
   );
