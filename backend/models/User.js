@@ -2,11 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-
-  // ── Champs gestion utilisateurs (binôme) ──
   name:  { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  phone: { type: String, required: true },
+  phone: { type: String, default: '' },
   role:  { type: String, enum: ['Admin', 'Manager', 'Employé'], default: 'Employé' },
   access: {
     ventes:     { type: Boolean, default: false },
@@ -14,9 +12,8 @@ const userSchema = new mongoose.Schema({
     stocks:     { type: Boolean, default: false },
     production: { type: Boolean, default: false },
   },
-  photo: { type: String }, // Base64
+  photo: { type: String, default: '' },
 
-  // ── Champ authentification ──
   motDePasse: {
     type: String,
     required: true,
@@ -26,14 +23,21 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// Hash mot de passe avant sauvegarde — compatible Mongoose 9
+// ── Hash mot de passe avant sauvegarde (Mongoose 9 compatible) ──
 userSchema.pre('save', async function () {
   if (!this.isModified('motDePasse')) return;
   const salt = await bcrypt.genSalt(10);
   this.motDePasse = await bcrypt.hash(this.motDePasse, salt);
 });
 
-// Méthode vérification mot de passe
+// ── Si rôle Admin → accès total automatique ──
+userSchema.pre('save', function () {
+  if (this.role === 'Admin') {
+    this.access = { ventes: true, achats: true, stocks: true, production: true };
+  }
+});
+
+// ── Vérifier mot de passe ──
 userSchema.methods.verifierMotDePasse = async function (motDePasseSaisi) {
   return await bcrypt.compare(motDePasseSaisi, this.motDePasse);
 };

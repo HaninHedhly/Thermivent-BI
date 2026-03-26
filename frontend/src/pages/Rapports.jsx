@@ -1,11 +1,44 @@
 // src/pages/Rapports.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import Chatbot from '../components/Chatbot';   // Assurez-vous que le chemin est correct
+import Chatbot from '../components/Chatbot';
+
 import '../styles/Web.css';
 
 const Rapports = () => {
-  const [activeTab, setActiveTab] = useState('ventes');
+  // 1. RÉCUPÉRATION DES PERMISSIONS DE L'UTILISATEUR
+  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const isAdmin = userData.role === 'Admin';
+  const access = userData.access || {};
+
+  // 2. DÉFINITION DE TOUS LES ONGLETS POSSIBLES
+  const allTabs = [
+    { key: 'ventes',     label: 'Rapport de Ventes',    permission: 'ventes' },
+    { key: 'achats',     label: 'Rapport d\'Achats',    permission: 'achats' },
+    { key: 'stock',      label: 'Rapport de Stock',     permission: 'stocks' }, // attention au 's' final selon votre DB
+    { key: 'production', label: 'Rapport de Production', permission: 'production' }
+  ];
+
+  // 3. FILTRAGE DES ONGLETS AUTORISÉS
+  const allowedTabs = allTabs.filter(tab => isAdmin || access[tab.permission] === true);
+
+  // 4. ÉTAT POUR L'ONGLET ACTIF (initialisé sur le premier onglet autorisé)
+  const [activeTab, setActiveTab] = useState(allowedTabs.length > 0 ? allowedTabs[0].key : '');
+
+  // Sécurité : Si l'utilisateur n'a aucun accès, on affiche un message
+  if (allowedTabs.length === 0 && !isAdmin) {
+    return (
+      <div className="dashboard-layout">
+        <Sidebar />
+        <div className="main-content">
+          <div className="page-container">
+            <h1>Accès Restreint</h1>
+            <p>Vous n'avez pas l'autorisation de consulter les rapports.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const stats = {
     ventes:     { revenue: 0, transactions: 0, croissance: 0, articles: 0 },
@@ -14,14 +47,7 @@ const Rapports = () => {
     production: { revenue: 0, transactions: 0, croissance: 0, articles: 0 }
   };
 
-  const current = stats[activeTab];
-
-  const tabs = [
-    { key: 'ventes',     label: 'Rapport de Ventes' },
-    { key: 'achats',     label: 'Rapport d\'Achats' },
-    { key: 'stock',      label: 'Rapport de Stock' },
-    { key: 'production', label: 'Rapport de Production' }
-  ];
+  const current = stats[activeTab] || stats['ventes'];
 
   return (
     <div className="dashboard-layout">
@@ -47,13 +73,13 @@ const Rapports = () => {
             </div>
             <div className="user-profile">
               <img 
-                src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" 
-                alt="Admin User" 
+                src={userData.photo || `https://ui-avatars.com/api/?name=${userData.name}&background=FDBA74&color=fff`} 
+                alt="User" 
                 style={{ width: '36px', height: '36px', borderRadius: '50%' }} 
               />
               <div className="user-info">
-                <p>Admin User</p>
-                <span>admin@company.tn</span>
+                <p>{userData.name || 'Utilisateur'}</p>
+                <span>{userData.email}</span>
               </div>
             </div>
           </div>
@@ -66,9 +92,9 @@ const Rapports = () => {
             <p>Consultez et analysez vos rapports d'activité</p>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs dynamiques */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-            {tabs.map(tab => (
+            {allowedTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
@@ -104,7 +130,7 @@ const Rapports = () => {
               </div>
               <div className="stat-icon" style={{ background: '#DCFCE7', color: '#10B981' }}>💰</div>
             </div>
-
+            {/* ... autres cartes statiques ... */}
             <div className="stat-card">
               <div className="stat-info">
                 <p className="stat-title">Transactions</p>
@@ -148,17 +174,15 @@ const Rapports = () => {
           }}>
             <div style={{ fontSize: '64px', marginBottom: '20px', opacity: 0.6 }}>📄</div>
             <h3 style={{ color: '#0F2038', marginBottom: '8px' }}>
-              Insérer votre dashboard Power BI ici
+              Rapport {allowedTabs.find(t => t.key === activeTab)?.label}
             </h3>
             <p style={{ color: '#64748B', maxWidth: '420px' }}>
-              Intégrez votre rapport Power BI pour visualiser les données en temps réel
+              Visualisation des données Power BI pour la section {activeTab}
             </p>
           </div>
         </div>
 
-        {/* ← Chatbot ajouté ici */}
         <Chatbot />
-
       </div>
     </div>
   );

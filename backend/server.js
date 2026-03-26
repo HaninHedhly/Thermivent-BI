@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const connectDB = require('./config/db');
-
+const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 
 // ── Middlewares ──
@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // ── Routes ──
 app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => res.send('Thermivent BI API running'));
 

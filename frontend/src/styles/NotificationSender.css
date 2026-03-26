@@ -1,0 +1,185 @@
+/* ════════════════════════════════════════
+   NotificationSender.css
+   Modales style Login (fond sombre #1e2d52)
+════════════════════════════════════════ */
+
+/* ── Zone d'envoi ── */
+.ns-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 24px;
+}
+
+.ns-title {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f2038;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ns-section {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.ns-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.ns-input {
+  flex: 1;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.ns-input:focus { border-color: #0f2038; }
+
+.ns-input::placeholder { color: #94a3b8; }
+
+.ns-btn {
+  padding: 11px 20px;
+  background: #0f2038;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.ns-btn:hover {
+  background: #1a3050;
+  transform: translateY(-1px);
+}
+
+/* ════════════════════════════════════════
+   MODALES — même style que Login.css
+════════════════════════════════════════ */
+
+@keyframes nsPopIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes nsFadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ns-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 30, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: nsFadeOverlay 0.2s ease;
+}
+
+.ns-modal {
+  background: #1e2d52;           /* même fond que Login */
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 360px;
+  max-width: 92%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  animation: nsPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Icône ── */
+.ns-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.ns-icon-succes {
+  background: rgba(52, 199, 110, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 199, 110, 0.25);
+}
+
+.ns-icon-erreur {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.ns-icon-warning {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+/* ── Textes ── */
+.ns-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.ns-modal-msg {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #8fa3c8;
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Bouton ── */
+.ns-modal-btn {
+  margin-top: 8px;
+  padding: 12px 34px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.ns-modal-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.ns-btn-succes  { background: #1a2540; color: #fff; }
+.ns-btn-succes:hover  { background: #0f1a32; }
+
+.ns-btn-erreur  { background: #ef4444; color: #fff; }
+.ns-btn-erreur:hover  { background: #dc2626; }
+
+.ns-btn-warning { background: #f59e0b; color: #fff; }
+.ns-btn-warning:hover { background: #d97706; }

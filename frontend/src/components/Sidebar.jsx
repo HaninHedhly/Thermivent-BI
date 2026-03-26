@@ -9,6 +9,17 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 1. RÉCUPÉRATION DES PERMISSIONS
+  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const isAdmin = userData.role === 'Admin';
+  const access = userData.access || {};
+
+  // 2. FONCTION DE VÉRIFICATION
+  const canSee = (permission) => {
+    if (isAdmin) return true; // L'admin voit tout
+    return access[permission] === true; // L'user voit si la permission est true
+  };
+
   const Icons = {
     Dashboard: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
     Arrow: () => <svg className={`arrow-icon ${isDashboardOpen ? 'rotated' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>,
@@ -32,23 +43,38 @@ const Sidebar = () => {
         </li>
 
         <ul className={`sub-menu ${isDashboardOpen ? 'open' : ''}`}>
-          <li className={location.pathname === '/ventes' ? 'active' : ''} onClick={() => navigate('/ventes')}>
-            <Icons.Ventes /> Ventes
-          </li>
-          <li className={location.pathname === '/achats' ? 'active' : ''} onClick={() => navigate('/achats')}>
-            <Icons.Achats /> Achats
-          </li>
-          <li className={location.pathname === '/stock' ? 'active' : ''} onClick={() => navigate('/stock')}>
-            <Icons.Stock /> Stock
-          </li>
-          <li className={location.pathname === '/production' ? 'active' : ''} onClick={() => navigate('/production')}>
-            <Icons.Production /> Production
-          </li>
+          {/* VÉRIFICATION POUR CHAQUE PAGE */}
+          {canSee('ventes') && (
+            <li className={location.pathname === '/ventes' ? 'active' : ''} onClick={() => navigate('/ventes')}>
+              <Icons.Ventes /> Ventes
+            </li>
+          )}
+
+          {canSee('achats') && (
+            <li className={location.pathname === '/achats' ? 'active' : ''} onClick={() => navigate('/achats')}>
+              <Icons.Achats /> Achats
+            </li>
+          )}
+
+          {canSee('stocks') && (
+            <li className={location.pathname === '/stock' ? 'active' : ''} onClick={() => navigate('/stock')}>
+              <Icons.Stock /> Stock
+            </li>
+          )}
+
+          {canSee('production') && (
+            <li className={location.pathname === '/production' ? 'active' : ''} onClick={() => navigate('/production')}>
+              <Icons.Production /> Production
+            </li>
+          )}
         </ul>
 
-        <li className={location.pathname === '/users' ? 'active' : ''} onClick={() => navigate('/users')}>
-          <Icons.UserMgmt /> Gestion des utilisateurs
-        </li>
+        {/* Uniquement pour l'Admin */}
+        {isAdmin && (
+          <li className={location.pathname === '/users' ? 'active' : ''} onClick={() => navigate('/users')}>
+            <Icons.UserMgmt /> Gestion des utilisateurs
+          </li>
+        )}
 
         <li className={location.pathname === '/rapports' ? 'active' : ''} onClick={() => navigate('/rapports')}>
           <Icons.Reports /> Rapports
