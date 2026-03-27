@@ -1,23 +1,21 @@
-/* ════════════════════════════════════════════════
+/* ════════════════════════════════════════════
    UserManagement.css
    Modales feedback — même style que Login.css
-════════════════════════════════════════════════ */
+════════════════════════════════════════════ */
 
 @keyframes umPopIn {
   from { opacity: 0; transform: scale(0.85); }
   to   { opacity: 1; transform: scale(1); }
 }
-
 @keyframes umFadeOverlay {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* ── Overlay ── */
 .um-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 30, 0.55);
+  background: rgba(10, 15, 30, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -26,9 +24,8 @@
   animation: umFadeOverlay 0.2s ease;
 }
 
-/* ── Boîte modale ── */
 .um-modal {
-  background: #1e2d52;
+  background: #1e2d52;        /* ← même fond que Login */
   border-radius: 20px;
   padding: 40px 36px;
   width: 360px;
@@ -38,11 +35,10 @@
   align-items: center;
   gap: 14px;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   animation: umPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ── Icône ── */
 .um-modal-icon {
   width: 64px;
   height: 64px;
@@ -65,7 +61,6 @@
   border: 1px solid rgba(52, 199, 110, 0.25);
 }
 
-/* ── Textes ── */
 .um-modal-title {
   margin: 0;
   font-size: 1.15rem;
@@ -82,7 +77,6 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* ── Bouton ── */
 .um-modal-btn {
   margin-top: 8px;
   padding: 12px 34px;
@@ -92,22 +86,15 @@
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
-
 .um-modal-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
-.um-erreur-btn {
-  background: #ef4444;
-  color: #ffffff;
-}
+.um-erreur-btn { background: #ef4444; color: #fff; }
 .um-erreur-btn:hover { background: #dc2626; }
 
-.um-succes-btn {
-  background: #1a2540;
-  color: #ffffff;
-}
+.um-succes-btn { background: #1a2540; color: #fff; }
 .um-succes-btn:hover { background: #0f1a32; }

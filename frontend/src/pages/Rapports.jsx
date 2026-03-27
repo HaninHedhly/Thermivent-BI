@@ -1,31 +1,25 @@
 // src/pages/Rapports.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Chatbot from '../components/Chatbot';
-
 import '../styles/Web.css';
 
 const Rapports = () => {
-  // 1. RÉCUPÉRATION DES PERMISSIONS DE L'UTILISATEUR
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const isAdmin = userData.role === 'Admin';
   const access = userData.access || {};
 
-  // 2. DÉFINITION DE TOUS LES ONGLETS POSSIBLES
   const allTabs = [
     { key: 'ventes',     label: 'Rapport de Ventes',    permission: 'ventes' },
     { key: 'achats',     label: 'Rapport d\'Achats',    permission: 'achats' },
-    { key: 'stock',      label: 'Rapport de Stock',     permission: 'stocks' }, // attention au 's' final selon votre DB
+    { key: 'stock',      label: 'Rapport de Stock',     permission: 'stocks' },
     { key: 'production', label: 'Rapport de Production', permission: 'production' }
   ];
 
-  // 3. FILTRAGE DES ONGLETS AUTORISÉS
   const allowedTabs = allTabs.filter(tab => isAdmin || access[tab.permission] === true);
 
-  // 4. ÉTAT POUR L'ONGLET ACTIF (initialisé sur le premier onglet autorisé)
   const [activeTab, setActiveTab] = useState(allowedTabs.length > 0 ? allowedTabs[0].key : '');
 
-  // Sécurité : Si l'utilisateur n'a aucun accès, on affiche un message
   if (allowedTabs.length === 0 && !isAdmin) {
     return (
       <div className="dashboard-layout">
@@ -48,6 +42,7 @@ const Rapports = () => {
   };
 
   const current = stats[activeTab] || stats['ventes'];
+  const activeTabLabel = allowedTabs.find(t => t.key === activeTab)?.label || '';
 
   return (
     <div className="dashboard-layout">
@@ -61,7 +56,11 @@ const Rapports = () => {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" placeholder="Rechercher un rapport..." className="search-input" />
+            <input 
+              type="text" 
+              placeholder="Rechercher un rapport..." 
+              className="search-input" 
+            />
           </div>
 
           <div className="top-right">
@@ -75,7 +74,6 @@ const Rapports = () => {
               <img 
                 src={userData.photo || `https://ui-avatars.com/api/?name=${userData.name}&background=FDBA74&color=fff`} 
                 alt="User" 
-                style={{ width: '36px', height: '36px', borderRadius: '50%' }} 
               />
               <div className="user-info">
                 <p>{userData.name || 'Utilisateur'}</p>
@@ -85,43 +83,27 @@ const Rapports = () => {
           </div>
         </div>
 
-        {/* Contenu principal */}
-        <div className="page-container" style={{ padding: '30px 40px' }}>
+        <div className="page-container">
           <div className="page-header">
             <h1>Rapports</h1>
             <p>Consultez et analysez vos rapports d'activité</p>
           </div>
 
           {/* Tabs dynamiques */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
+          <div className="tabs-container">
             {allowedTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  background: activeTab === tab.key ? '#0F2038' : '#F1F5F9',
-                  color: activeTab === tab.key ? '#FFFFFF' : '#64748B',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
               >
                 {tab.label}
               </button>
             ))}
           </div>
 
-          {/* KPI Cards */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-            gap: '20px', 
-            marginBottom: '40px' 
-          }}>
+          {/* KPI Stats Cards */}
+          <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-info">
                 <p className="stat-title">Revenus Total</p>
@@ -130,7 +112,7 @@ const Rapports = () => {
               </div>
               <div className="stat-icon" style={{ background: '#DCFCE7', color: '#10B981' }}>💰</div>
             </div>
-            {/* ... autres cartes statiques ... */}
+
             <div className="stat-card">
               <div className="stat-info">
                 <p className="stat-title">Transactions</p>
@@ -159,26 +141,11 @@ const Rapports = () => {
             </div>
           </div>
 
-          {/* Zone Power BI Placeholder */}
-          <div style={{
-            border: '2px dashed #CBD5E1',
-            borderRadius: '16px',
-            height: '520px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#F8FAFC',
-            textAlign: 'center',
-            padding: '40px'
-          }}>
-            <div style={{ fontSize: '64px', marginBottom: '20px', opacity: 0.6 }}>📄</div>
-            <h3 style={{ color: '#0F2038', marginBottom: '8px' }}>
-              Rapport {allowedTabs.find(t => t.key === activeTab)?.label}
-            </h3>
-            <p style={{ color: '#64748B', maxWidth: '420px' }}>
-              Visualisation des données Power BI pour la section {activeTab}
-            </p>
+          {/* Power BI Placeholder */}
+          <div className="powerbi-placeholder">
+            <div className="placeholder-icon">📄</div>
+            <h3> {activeTabLabel}</h3>
+            <p>Visualisation des données Power BI pour la section {activeTab}</p>
           </div>
         </div>
 

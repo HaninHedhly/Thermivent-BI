@@ -23,7 +23,8 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // On ne redirige que si l'erreur est 401 ET qu'on n'est pas déjà sur /login
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -31,5 +32,4 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default instance;

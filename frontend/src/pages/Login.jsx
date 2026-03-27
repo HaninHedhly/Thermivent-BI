@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import loginImage from '../assets/loginImage.png';
@@ -7,35 +7,44 @@ import '../styles/Login.css';
 const Login = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({ email: '', motDePasse: '' });
-  const [touched, setTouched] = useState({ email: false, motDePasse: false });
+  const [formData, setFormData]       = useState({ email: '', motDePasse: '' });
+  const [touched, setTouched]         = useState({ email: false, motDePasse: false });
   const [modalErreur, setModalErreur] = useState('');
   const [modalSucces, setModalSucces] = useState(false);
-  const [chargement, setChargement] = useState(false);
+  const [chargement, setChargement]   = useState(false);
 
-  const erreurEmail = touched.email && !formData.email ? "L'email est obligatoire" : '';
-  const erreurMdp = touched.motDePasse && !formData.motDePasse ? 'Le mot de passe est obligatoire' : '';
+  const erreurEmail = touched.email      && !formData.email      ? "L'email est obligatoire"        : '';
+  const erreurMdp   = touched.motDePasse && !formData.motDePasse ? 'Le mot de passe est obligatoire' : '';
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(f => ({ ...f, [e.target.name]: e.target.value }));
+    // NE PAS fermer le modal ici — on le laisse visible jusqu'au clic "Réessayer"
   };
 
   const handleBlur = (e) => {
-    setTouched({ ...touched, [e.target.name]: true });
+    setTouched(t => ({ ...t, [e.target.name]: true }));
   };
 
+  // ─────────────────────────────────────────────────────────────
+  // handleSubmit — preventDefault + stopPropagation en PREMIER
+  // pour bloquer tout refresh natif du navigateur
+  // ─────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();   // ← bloque la propagation vers le DOM parent
+
+    // Marquer les deux champs comme touchés
     setTouched({ email: true, motDePasse: true });
 
+    // Arrêter si champs vides
     if (!formData.email || !formData.motDePasse) return;
 
     setChargement(true);
-    setModalErreur('');
+    setModalErreur('');    // réinitialiser l'erreur précédente
 
     try {
       const res = await axios.post('/auth/login', {
-        email: formData.email,
+        email:      formData.email,
         motDePasse: formData.motDePasse,
       });
 
@@ -46,23 +55,16 @@ const Login = () => {
       setTimeout(() => navigate('/dashboard'), 2000);
 
     } catch (err) {
-      const message = err.response?.data?.message || 'Erreur de connexion, réessayez';
-      setModalErreur(message);
+      // Stocker le message d'erreur — le modal reste affiché jusqu'au clic
+      setModalErreur(
+        err.response?.data?.message || 'Erreur de connexion, réessayez'
+      );
     } finally {
       setChargement(false);
     }
   };
 
-  // === NOUVEAU : Fermeture automatique du modal erreur après 3 secondes ===
-  useEffect(() => {
-    let timer;
-    if (modalErreur) {
-      timer = setTimeout(() => {
-        setModalErreur('');
-      }, 3000); // 3 secondes minimum
-    }
-    return () => clearTimeout(timer); // Nettoyage
-  }, [modalErreur]);
+  const fermerModalErreur = () => setModalErreur('');
 
   return (
     <div className="login-page">
@@ -78,13 +80,16 @@ const Login = () => {
           <h1>Bienvenue</h1>
           <p className="subtitle">Connectez-vous à votre compte</p>
 
+          {/* noValidate empêche la validation HTML native qui provoque un refresh */}
           <form className="login-form" onSubmit={handleSubmit} noValidate>
+
             {/* Email */}
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <div className={`input-wrapper ${erreurEmail ? 'input-error' : ''}`}>
                 <span className="input-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                     <polyline points="22,6 12,13 2,6"/>
                   </svg>
@@ -100,7 +105,17 @@ const Login = () => {
                   autoComplete="email"
                 />
               </div>
-              {erreurEmail && <span className="field-error">⚠️ {erreurEmail}</span>}
+              {erreurEmail && (
+                <span className="field-error">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8"  x2="12"    y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  {erreurEmail}
+                </span>
+              )}
             </div>
 
             {/* Mot de passe */}
@@ -108,7 +123,8 @@ const Login = () => {
               <label htmlFor="motDePasse">Mot de passe</label>
               <div className={`input-wrapper ${erreurMdp ? 'input-error' : ''}`}>
                 <span className="input-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
@@ -124,9 +140,20 @@ const Login = () => {
                   autoComplete="current-password"
                 />
               </div>
-              {erreurMdp && <span className="field-error">⚠️ {erreurMdp}</span>}
+              {erreurMdp && (
+                <span className="field-error">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8"  x2="12"    y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  {erreurMdp}
+                </span>
+              )}
             </div>
 
+            {/* Bouton */}
             <button type="submit" className="btn-login" disabled={chargement}>
               {chargement ? (
                 <><div className="spinner" /> Connexion en cours...</>
@@ -134,42 +161,44 @@ const Login = () => {
                 <>Se connecter <span className="btn-arrow">→</span></>
               )}
             </button>
+
           </form>
         </div>
       </div>
 
-      {/* ==================== MODAL ERREUR ==================== */}
+      {/* ══════════════════════════════
+          MODAL ERREUR
+          Reste affiché jusqu'au clic
+      ══════════════════════════════ */}
       {modalErreur && (
-        <div className="modal-overlay" onClick={() => setModalErreur('')}>
-          <div 
-            className="modal modal-erreur" 
-            onClick={(e) => e.stopPropagation()}   // Empêche la fermeture si on clique sur le modal
-          >
+        <div className="modal-overlay" onClick={fermerModalErreur}>
+          <div className="modal modal-erreur" onClick={e => e.stopPropagation()}>
             <div className="modal-icon modal-icon-erreur">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
+                <line x1="15" y1="9"  x2="9"  y2="15"/>
+                <line x1="9"  y1="9"  x2="15" y2="15"/>
               </svg>
             </div>
             <h3>Connexion échouée</h3>
             <p>{modalErreur}</p>
-            <button 
-              className="modal-btn modal-btn-erreur" 
-              onClick={() => setModalErreur('')}
-            >
+            <button className="modal-btn modal-btn-erreur" onClick={fermerModalErreur}>
               Réessayer
             </button>
           </div>
         </div>
       )}
 
-      {/* ==================== MODAL SUCCÈS ==================== */}
+      {/* ══════════════════════════════
+          MODAL SUCCÈS
+      ══════════════════════════════ */}
       {modalSucces && (
         <div className="modal-overlay">
           <div className="modal modal-succes">
             <div className="modal-icon modal-icon-succes">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
@@ -182,6 +211,7 @@ const Login = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
