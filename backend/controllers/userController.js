@@ -1,6 +1,5 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-
 // GET tous les utilisateurs
 exports.getUsers = async (req, res) => {
   try {
@@ -40,35 +39,40 @@ exports.createUser = async (req, res) => {
 // PUT modifier un utilisateur
 exports.updateUser = async (req, res) => {
   try {
-    const data = { ...req.body };
+    const { ancienMotDePasse, motDePasse, name, email, phone, photo, role, access } = req.body;
 
-    // Si Admin → accès total forcé
-    if (data.role === 'Admin') {
-      data.access = { ventes: true, achats: true, stocks: true, production: true };
+    const user = await User.findById(req.params.id).select('+motDePasse');
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
+    if (motDePasse) {
+      if (!ancienMotDePasse) {
+        return res.status(400).json({ message: "L'ancien mot de passe est requis." });
+      }
+
+      const estValide = await bcrypt.compare(ancienMotDePasse, user.motDePasse);
+      if (!estValide) {
+        // Utiliser 400 ici pour que l'intercepteur axios.js ne te déconnecte pas
+        return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
+      }
+      user.motDePasse = motDePasse;
     }
 
-    // Hash le mot de passe si fourni
-    if (data.motDePasse) {
-      const salt = await bcrypt.genSalt(10);
-      data.motDePasse = await bcrypt.hash(data.motDePasse, salt);
-    } else {
-      delete data.motDePasse; // ne pas écraser si non fourni
-    }
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phone !== undefined) user.phone = phone;
+    if (photo !== undefined) user.photo = photo;
+    if (role) user.role = role;
+    if (access) user.access = access;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id, data, { new: true, runValidators: true }
-    );
+    await user.save();
+    const response = user.toObject();
+    delete response.motDePasse;
+    res.status(200).json(response);
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
-
-    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
-
 // DELETE supprimer un utilisateur
 exports.deleteUser = async (req, res) => {
   try {

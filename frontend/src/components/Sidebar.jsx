@@ -1,99 +1,166 @@
-// src/components/Sidebar.jsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../assets/logoImage.webp';
 import '../styles/Sidebar.css';
 
 const Sidebar = () => {
-  const [isDashboardOpen, setIsDashboardOpen] = useState(true);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const [dashOpen, setDashOpen] = useState(true);
 
-  // 1. RÉCUPÉRATION DES PERMISSIONS
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
-  const isAdmin = userData.role === 'Admin';
-  const access = userData.access || {};
+  const userRaw = localStorage.getItem('user');
+  const user    = userRaw ? JSON.parse(userRaw) : null;
+  const access  = user?.access || {};
+  const role    = user?.role   || '';
+  const isAdmin = role === 'Admin';
 
-  // 2. FONCTION DE VÉRIFICATION
-  const canSee = (permission) => {
-    if (isAdmin) return true; // L'admin voit tout
-    return access[permission] === true; // L'user voit si la permission est true
-  };
+  const dashItems = [
+    { label:'Ventes',     path:'/dashboard/ventes',     key:'ventes'     },
+    { label:'Achats',     path:'/dashboard/achats',     key:'achats'     },
+    { label:'Stock',      path:'/dashboard/stock',      key:'stocks'     },
+    { label:'Production', path:'/dashboard/production', key:'production' },
+  ].filter(item => isAdmin || access[item.key]);
 
-  const Icons = {
-    Dashboard: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
-    Arrow: () => <svg className={`arrow-icon ${isDashboardOpen ? 'rotated' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>,
-    Ventes: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
-    Achats: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>,
-    Stock: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
-    Production: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-    UserMgmt: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-    Reports: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
     <div className="sidebar">
+
+      {/* Logo */}
       <div className="logo-container">
-          <img src={logoImage} alt="Thermivent" className="logo-image" />
+         <img src={logoImage} alt="Thermivent" className="logo-image" />
+
       </div>
 
       <ul className="sidebar-menu">
-        <li onClick={() => setIsDashboardOpen(!isDashboardOpen)}>
-          <Icons.Dashboard /> Dashboard <Icons.Arrow />
-        </li>
 
-        <ul className={`sub-menu ${isDashboardOpen ? 'open' : ''}`}>
-          {/* VÉRIFICATION POUR CHAQUE PAGE */}
-          {canSee('ventes') && (
-            <li className={location.pathname === '/ventes' ? 'active' : ''} onClick={() => navigate('/ventes')}>
-              <Icons.Ventes /> Ventes
-            </li>
-          )}
-
-          {canSee('achats') && (
-            <li className={location.pathname === '/achats' ? 'active' : ''} onClick={() => navigate('/achats')}>
-              <Icons.Achats /> Achats
-            </li>
-          )}
-
-          {canSee('stocks') && (
-            <li className={location.pathname === '/stock' ? 'active' : ''} onClick={() => navigate('/stock')}>
-              <Icons.Stock /> Stock
-            </li>
-          )}
-
-          {canSee('production') && (
-            <li className={location.pathname === '/production' ? 'active' : ''} onClick={() => navigate('/production')}>
-              <Icons.Production /> Production
-            </li>
-          )}
-        </ul>
-
-        {/* Uniquement pour l'Admin */}
-        {isAdmin && (
-          <li className={location.pathname === '/users' ? 'active' : ''} onClick={() => navigate('/users')}>
-            <Icons.UserMgmt /> Gestion des utilisateurs
+        {/* Dashboards accordéon */}
+        {dashItems.length > 0 && (
+          <li
+            className={dashItems.some(i => isActive(i.path)) ? 'active' : ''}
+            onClick={() => setDashOpen(o => !o)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            Dashboards
+            <svg className={`arrow-icon ${dashOpen ? 'rotated' : ''}`}
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </li>
         )}
 
-        <li className={location.pathname === '/rapports' ? 'active' : ''} onClick={() => navigate('/rapports')}>
-          <Icons.Reports /> Rapports
+        <ul className={`sub-menu ${dashOpen ? 'open' : ''}`}>
+          {dashItems.map(item => (
+            <li key={item.path}
+              className={isActive(item.path) ? 'active' : ''}
+              onClick={() => navigate(item.path)}>
+              {item.label}
+            </li>
+          ))}
+        </ul>
+
+        {/* Rapports */}
+        <li className={isActive('/rapports') ? 'active' : ''}
+          onClick={() => navigate('/rapports')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Rapports
         </li>
+
+        
+
+        {/* Utilisateurs — Admin seulement */}
+        {isAdmin && (
+          <li className={isActive('/utilisateurs') ? 'active' : ''}
+            onClick={() => navigate('/utilisateurs')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Gestion des utilisateurs
+          </li>
+        )}
+
       </ul>
 
-      <div className="sidebar-footer">
-        <div className="logout-btn" onClick={() => {
-          localStorage.clear();
-          navigate('/login');
+      {/* ── Profil + Déconnexion ── */}
+      <div style={{
+        padding:'16px 20px', borderTop:'1px solid rgba(255,255,255,0.08)', marginTop:'auto'
+      }}>
+        {/* Clic sur le profil → page profil */}
+        <div
+          onClick={() => navigate('/profil')}
+          style={{
+            display:'flex', alignItems:'center', gap:'10px',
+            marginBottom:'12px', cursor:'pointer', padding:'8px 10px',
+            borderRadius:'10px',
+            background: isActive('/profil') ? 'rgba(255,255,255,0.08)' : 'transparent',
+            transition:'background 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+          onMouseLeave={e => e.currentTarget.style.background = isActive('/profil') ? 'rgba(255,255,255,0.08)' : 'transparent'}
+        >
+          {user?.photo
+            ? <img src={user.photo} alt="" style={{
+                width:'34px', height:'34px', borderRadius:'50%',
+                objectFit:'cover', flexShrink:0
+              }} />
+            : <div style={{
+                width:'34px', height:'34px', borderRadius:'50%',
+                background:'linear-gradient(135deg, #0e1930, #2563EB)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                color:'white', fontWeight:'700', fontSize:'13px', flexShrink:0
+              }}>
+                {(user?.name || 'U').substring(0, 2).toUpperCase()}
+              </div>
+          }
+          <div style={{ overflow:'hidden' }}>
+            <p style={{ margin:0, color:'white', fontSize:'13px', fontWeight:'600',
+              whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+              {user?.name || 'Utilisateur'}
+            </p>
+            <span style={{ color:'#64748B', fontSize:'11px' }}>{user?.role || ''}</span>
+          </div>
+          {/* Icône profil */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="#64748B" strokeWidth="2" style={{ marginLeft:'auto', flexShrink:0 }}>
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+
+        {/* Bouton déconnexion */}
+        <button onClick={handleLogout} style={{
+          width:'100%', padding:'10px', borderRadius:'10px',
+          background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)',
+          color:'#F87171', fontWeight:'600', fontSize:'13px',
+          cursor:'pointer', display:'flex', alignItems:'center',
+          justifyContent:'center', gap:'8px', transition:'background 0.2s', fontFamily:'inherit',
         }}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/>
             <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
           Déconnexion
-        </div>
+        </button>
       </div>
+
     </div>
   );
 };
