@@ -1,17 +1,19 @@
 /* ════════════════════════════════════════════
    UserManagement.css
-   Modales feedback — même style que Login.css
+   Styles professionnels et élégants
 ════════════════════════════════════════════ */
 
 @keyframes umPopIn {
   from { opacity: 0; transform: scale(0.85); }
   to   { opacity: 1; transform: scale(1); }
 }
+
 @keyframes umFadeOverlay {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
+/* MODALES */
 .um-overlay {
   position: fixed;
   inset: 0;
@@ -25,7 +27,7 @@
 }
 
 .um-modal {
-  background: #1e2d52;        /* ← même fond que Login */
+  background: #1e2d52;
   border-radius: 20px;
   padding: 40px 36px;
   width: 360px;
@@ -98,3 +100,54 @@
 
 .um-succes-btn { background: #1a2540; color: #fff; }
 .um-succes-btn:hover { background: #0f1a32; }
+
+/* CARTES STATISTIQUES */
+.stats-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 24px; 
+  margin-bottom: 40px; 
+}
+
+.stat-card {
+  background: #ffffff;
+  padding: 28px 26px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 32, 56, 0.06);
+  border: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 8px 25px rgba(15, 32, 56, 0.10);
+  transform: translateY(-3px);
+}
+
+.stat-info { flex: 1; }
+.stat-title { margin: 0 0 8px 0; color: #64748B; font-size: 14.5px; font-weight: 500; }
+.stat-value { margin: 0; color: #0F2038; font-size: 42px; font-weight: 700; line-height: 1.1; }
+.stat-trend { font-size: 13.8px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+
+.trend-up { color: #10B981; }
+.trend-down { color: #EF4444; }
+
+.stat-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justifyContent: center;
+  font-size: 26px;
+  background: #F8FAFC;
+  color: #334155;
+  flex-shrink: 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.stat-card:nth-child(1) .stat-icon { background: #EFF6FF; color: #1E40AF; }
+.stat-card:nth-child(2) .stat-icon { background: #F3E8FF; color: #6B21A8; }
+.stat-card:nth-child(3) .stat-icon { background: #ECFDF5; color: #166534; }
