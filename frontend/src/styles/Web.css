@@ -249,3 +249,67 @@ td strong { color: #0F172A; font-weight: 600; }
   transition: background 0.2s;
 }
 .clear-btn:hover { background: #F8FAFC; }
+
+/* =============================================
+   Tabs Styling
+   ============================================= */
+
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: #F1F5F9;
+  color: #475569;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: #E2E8F0;
+  color: #0F2038;
+}
+
+.tab-button.active {
+  background: #0F2038;
+  color: white;
+  box-shadow: 0 4px 12px rgba(15, 32, 56, 0.15);
+}
+
+/* Power BI Placeholder Styling */
+.powerbi-placeholder {
+  background: white;
+  border-radius: 16px;
+  padding: 60px 40px;
+  text-align: center;
+  border: 2px dashed #E2E8F0;
+  color: #64748B;
+  box-shadow: 0 4px 20px rgba(15, 32, 56, 0.06);
+}
+
+.powerbi-placeholder .placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.powerbi-placeholder h3 {
+  margin: 0 0 12px 0;
+  color: #0F2038;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.powerbi-placeholder p {
+  margin: 0;
+  font-size: 15.5px;
+}
