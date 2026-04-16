@@ -255,7 +255,7 @@ const UserManagement = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <Chatbot />
+      <Chatbot sessionId="admin-user-management" />
 
       <div className="main-content">
         <div className="top-navbar">

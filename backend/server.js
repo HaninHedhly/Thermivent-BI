@@ -20,6 +20,8 @@ app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/notifications', notificationRoutes);
 
+
+
 app.get('/', (req, res) => res.send('Thermivent BI API running'));
 
 // ── Connexion DB + Démarrage ──

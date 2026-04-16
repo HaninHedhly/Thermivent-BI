@@ -47,9 +47,10 @@ const Rapports = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
+      <Chatbot sessionId={userData?._id || 'default'} />
 
       <div className="main-content">
-        {/* Top Navbar - unchanged */}
+        {/* Top Navbar */}
         <div className="top-navbar">
           <div className="search-container">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
@@ -102,9 +103,8 @@ const Rapports = () => {
             ))}
           </div>
 
-          {/* KPI Stats Cards - unchanged */}
+          {/* KPI Stats Cards */}
           <div className="stats-grid">
-            {/* ... existing stat cards ... */}
             <div className="stat-card">
               <div className="stat-info">
                 <p className="stat-title">Revenus Total</p>
@@ -142,15 +142,13 @@ const Rapports = () => {
             </div>
           </div>
 
-          {/* Improved Power BI Placeholder */}
+          {/* Power BI Placeholder */}
           <div className="powerbi-placeholder">
             <div className="placeholder-icon">📊</div>
             <h3>{activeTabLabel}</h3>
             <p>Visualisation des données Power BI pour la section {activeTab}</p>
           </div>
         </div>
-
-        <Chatbot />
       </div>
     </div>
   );

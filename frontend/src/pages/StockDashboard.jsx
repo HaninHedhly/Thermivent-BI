@@ -12,7 +12,7 @@ const StockDashboard = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <Chatbot />
+      <Chatbot sessionId={userData?._id || 'default'} />
       <div className="main-content">
         <TopNavbar />
         <div className="page-container">
@@ -31,7 +31,6 @@ const StockDashboard = () => {
               <p>L'intégration Power BI sera disponible prochainement.</p>
             </div>
           </div>
-          {/* ✅ section="Stock" — corrigé */}
           {userData?.name && !isAdmin && <NotificationSender section="Stock" />}
         </div>
       </div>
