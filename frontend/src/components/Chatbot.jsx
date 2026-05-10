@@ -163,34 +163,42 @@ const Chatbot = ({ sessionId = 'default' }) => {
              {msg.success === false ? (
   <div className="error-message">
     <div className="error-card">
-      {msg.errorType === "quota_exceeded" && (
-        <div className="error-icon-big">⏳</div>
-      )}
-      
+
+      {/* Icône selon le type d'erreur */}
+      <div className="error-icon-big">
+        {msg.errorType === "quota_exceeded" && "⏳"}
+        {msg.errorType === "server_offline" && "🔌"}
+        {msg.errorType === "timeout"        && "⌛"}
+        {msg.errorType === "technical_error" && "⚠️"}
+        {!msg.errorType                      && "❌"}
+      </div>
+
+      {/* Titre selon le type */}
       <div className="error-title">
-        {msg.errorType === "quota_exceeded" 
-          ? "Limite temporaire atteinte" 
-          : "Une erreur est survenue"}
+        {msg.errorType === "quota_exceeded"  && "Service temporairement surchargé"}
+        {msg.errorType === "server_offline"  && "Serveur IA hors ligne"}
+        {msg.errorType === "timeout"         && "Délai d'attente dépassé"}
+        {msg.errorType === "technical_error" && "Erreur technique"}
+        {!msg.errorType                      && "Une erreur est survenue"}
       </div>
 
-      <div className="error-text">
-        {msg.texte}
-      </div>
+      <div className="error-text">{msg.texte}</div>
 
-      {msg.errorType === "quota_exceeded" && (
-        <button 
+      {/* Bouton retry pour les cas récupérables */}
+      {(msg.errorType === "quota_exceeded" || msg.errorType === "timeout") && (
+        <button
           className="retry-btn"
           onClick={handleRetry}
           disabled={loading}
         >
-          Réessayer maintenant
+          🔄 Réessayer
         </button>
       )}
     </div>
   </div>
 ) : (
-                <span style={{ whiteSpace: 'pre-wrap' }}>{msg.texte}</span>
-              )}
+  <span style={{ whiteSpace: 'pre-wrap' }}>{msg.texte}</span>
+)}
 
               {msg.sqlQuery && msg.success && (
                 <details style={{ marginTop: '10px', fontSize: '11px', opacity: 0.75 }}>

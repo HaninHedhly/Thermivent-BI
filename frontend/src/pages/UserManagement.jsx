@@ -142,9 +142,35 @@ const UserManagement = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!formData.name.trim())  { setErreurMsg('Le nom est obligatoire.');  return; }
-    if (!formData.email.trim()) { setErreurMsg("L'email est obligatoire."); return; }
+    // Nom
+    if (!formData.name.trim()) {
+      setErreurMsg('Le nom est obligatoire.'); return;
+    }
+    if (formData.name.trim().length < 2) {
+      setErreurMsg('Le nom doit contenir au moins 2 caractères.'); return;
+    }
+    if (/\d/.test(formData.name)) {
+      setErreurMsg('Le nom ne doit pas contenir de chiffres.'); return;
+    }
 
+    // Email — uniquement @thermivent.com
+    if (!formData.email.trim()) {
+      setErreurMsg("L'email est obligatoire."); return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@thermivent\.tn$/i;
+    if (!emailRegex.test(formData.email.trim())) {
+      setErreurMsg("L'email doit être une adresse @thermivent.tn (ex: nom.prenom@thermivent.tn)."); return;
+    }
+
+    // Téléphone — tunisien : +216 suivi de 8 chiffres (optionnel)
+    if (formData.phone.trim()) {
+      const phoneRegex = /^\+216[0-9]{8}$/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        setErreurMsg('Le numéro doit être au format tunisien : +216XXXXXXXX (8 chiffres après +216).'); return;
+      }
+    }
+
+    // Mot de passe
     if (!currentUser) {
       if (!formData.motDePasse) {
         setErreurMsg('Le mot de passe est obligatoire.'); return;
@@ -403,11 +429,28 @@ const UserManagement = () => {
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'15px' }}>
                   <div>
                     <label style={LS}>Email <span style={{ color:'#EF4444' }}>*</span></label>
-                    <input type="email" style={IS} value={formData.email} onChange={e => setFormData(f => ({...f, email:e.target.value}))} />
+                    <input
+                      type="email"
+                      style={IS}
+                      placeholder="prenom.nom@thermivent.tn"
+                      value={formData.email}
+                      onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
+                    />
                   </div>
                   <div>
                     <label style={LS}>Téléphone</label>
-                    <input type="text" style={IS} value={formData.phone} onChange={e => setFormData(f => ({...f, phone:e.target.value}))} />
+                    <input
+                      type="text"
+                      style={IS}
+                      placeholder="+21612345678"
+                      maxLength={12}
+                      value={formData.phone}
+                      onChange={e => {
+                        let val = e.target.value;
+                        if (val && !val.startsWith('+')) val = '+216' + val.replace(/\D/g, '');
+                        setFormData(f => ({ ...f, phone: val }));
+                      }}
+                    />
                   </div>
                 </div>
 
