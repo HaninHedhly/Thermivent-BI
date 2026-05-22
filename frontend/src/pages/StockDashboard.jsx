@@ -5,6 +5,8 @@ import TopNavbar from '../components/TopNavbar';
 import NotificationSender from '../components/NotificationSender';
 import '../styles/Dashboard.css';
 
+const POWERBI_URL_STOCK = "https://app.powerbi.com/view?r=eyJrIjoiYTdjOWI3ZDAtOTZiMS00MWQzLTk4OGEtNDBjNTNkMTEyNDdkIiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9";
+
 const StockDashboard = () => {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   const isAdmin  = userData?.role === 'Admin';
@@ -21,14 +23,16 @@ const StockDashboard = () => {
             <p>Surveillez les niveaux de stock et la disponibilité des produits.</p>
           </div>
           <div className="powerbi-section">
-            <div className="powerbi-header">
-              <h2>Dashboard Stock — Power BI</h2>
-              <span className="powerbi-badge"><span className="powerbi-badge-dot" />En attente d'intégration</span>
-            </div>
-            <div className="powerbi-body">
-              <div className="powerbi-icon icon-stock">📦</div>
-              <h3>Dashboard de Stock</h3>
-              <p>L'intégration Power BI sera disponible prochainement.</p>
+            <div className="powerbi-iframe-wrapper">
+              <iframe
+                title="Dashboard Stock"
+                src={POWERBI_URL_STOCK}
+                width="100%"
+                height="600"
+                frameBorder="0"
+                allowFullScreen
+                style={{ borderRadius: '8px', border: 'none', display: 'block' }}
+              />
             </div>
           </div>
           {userData?.name && !isAdmin && <NotificationSender section="Stock" />}

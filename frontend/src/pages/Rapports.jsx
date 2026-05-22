@@ -4,16 +4,23 @@ import Sidebar from '../components/Sidebar';
 import Chatbot from '../components/Chatbot';
 import '../styles/Web.css';
 
+const POWERBI_URLS = {
+  production: "https://app.powerbi.com/view?r=eyJrIjoiNGNlZDMwOWUtM2Y4YS00YjVlLWEzN2QtNjQyMmMxZTIxYTY1IiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9",
+  stock:      "https://app.powerbi.com/view?r=eyJrIjoiZjhmODE3NjQtYmYxOS00NDcxLWFjNTctZjg3OGFjMjU3NjVkIiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9",
+  ventes:     "https://app.powerbi.com/view?r=eyJrIjoiNGE0NGNiMDAtOGQ1YS00Mzc0LTg0ZGQtZjZlOGRjYTYzNjBlIiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9",
+  achats:     "https://app.powerbi.com/view?r=eyJrIjoiNmZiYTUzZjYtMzM0YS00MzkxLWI0NzItNTRmZDcwM2UxOTg0IiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9",
+};
+
 const Rapports = () => {
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const isAdmin = userData.role === 'Admin';
   const access = userData.access || {};
 
   const allTabs = [
-    { key: 'ventes',     label: 'Rapport de Ventes',    permission: 'ventes' },
-    { key: 'achats',     label: 'Rapport d\'Achats',    permission: 'achats' },
-    { key: 'stock',      label: 'Rapport de Stock',     permission: 'stocks' },
-    { key: 'production', label: 'Rapport de Production', permission: 'production' }
+    { key: 'ventes',     label: 'Rapport de Ventes',     permission: 'ventes' },
+    { key: 'achats',     label: "Rapport d'Achats",      permission: 'achats' },
+    { key: 'stock',      label: 'Rapport de Stock',      permission: 'stocks' },
+    { key: 'production', label: 'Rapport de Production', permission: 'production' },
   ];
 
   const allowedTabs = allTabs.filter(tab => isAdmin || access[tab.permission] === true);
@@ -34,14 +41,6 @@ const Rapports = () => {
     );
   }
 
-  const stats = {
-    ventes:     { revenue: 0, transactions: 0, croissance: 0, articles: 0 },
-    achats:     { revenue: 0, transactions: 0, croissance: 0, articles: 0 },
-    stock:      { revenue: 0, transactions: 0, croissance: 0, articles: 0 },
-    production: { revenue: 0, transactions: 0, croissance: 0, articles: 0 }
-  };
-
-  const current = stats[activeTab] || stats['ventes'];
   const activeTabLabel = allowedTabs.find(t => t.key === activeTab)?.label || '';
 
   return (
@@ -57,10 +56,10 @@ const Rapports = () => {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input 
-              type="text" 
-              placeholder="Rechercher un rapport..." 
-              className="search-input" 
+            <input
+              type="text"
+              placeholder="Rechercher un rapport..."
+              className="search-input"
             />
           </div>
 
@@ -72,9 +71,9 @@ const Rapports = () => {
               </svg>
             </div>
             <div className="user-profile">
-              <img 
-                src={userData.photo || `https://ui-avatars.com/api/?name=${userData.name}&background=FDBA74&color=fff`} 
-                alt="User" 
+              <img
+                src={userData.photo || `https://ui-avatars.com/api/?name=${userData.name}&background=FDBA74&color=fff`}
+                alt="User"
               />
               <div className="user-info">
                 <p>{userData.name || 'Utilisateur'}</p>
@@ -103,51 +102,22 @@ const Rapports = () => {
             ))}
           </div>
 
-          {/* KPI Stats Cards */}
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-info">
-                <p className="stat-title">Revenus Total</p>
-                <h2 className="stat-value">{current.revenue.toLocaleString()} TND</h2>
-                <span className="stat-trend trend-up">↑ 0%</span>
-              </div>
-              <div className="stat-icon" style={{ background: '#DCFCE7', color: '#10B981' }}>💰</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-info">
-                <p className="stat-title">Transactions</p>
-                <h2 className="stat-value">{current.transactions}</h2>
-                <span className="stat-trend trend-up">↑ 0%</span>
-              </div>
-              <div className="stat-icon" style={{ background: '#DBEAFE', color: '#3B82F6' }}>📄</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-info">
-                <p className="stat-title">Croissance</p>
-                <h2 className="stat-value">{current.croissance}%</h2>
-                <span className="stat-trend trend-up">↑ 0%</span>
-              </div>
-              <div className="stat-icon" style={{ background: '#FEF3C7', color: '#F59E0B' }}>📈</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-info">
-                <p className="stat-title">Articles</p>
-                <h2 className="stat-value">{current.articles}</h2>
-                <span className="stat-trend trend-down">↓ 0%</span>
-              </div>
-              <div className="stat-icon" style={{ background: '#F3E8FF', color: '#8B5CF6' }}>📦</div>
+          {/* Power BI iframe — change selon l'onglet actif */}
+          <div className="powerbi-section">
+            <div className="powerbi-iframe-wrapper">
+              <iframe
+                key={activeTab}
+                title={activeTabLabel}
+                src={POWERBI_URLS[activeTab]}
+                width="100%"
+                height="600"
+                frameBorder="0"
+                allowFullScreen
+                style={{ borderRadius: '8px', border: 'none', display: 'block' }}
+              />
             </div>
           </div>
 
-          {/* Power BI Placeholder */}
-          <div className="powerbi-placeholder">
-            <div className="placeholder-icon">📊</div>
-            <h3>{activeTabLabel}</h3>
-            <p>Visualisation des données Power BI pour la section {activeTab}</p>
-          </div>
         </div>
       </div>
     </div>

@@ -5,6 +5,8 @@ import TopNavbar from '../components/TopNavbar';
 import NotificationSender from '../components/NotificationSender';
 import '../styles/Dashboard.css';
 
+const POWERBI_URL_ACHATS = "https://app.powerbi.com/view?r=eyJrIjoiYTRhNzJmNDMtNGZlYS00YTJhLTgzMTgtZTFmZmY5OWE4OGUwIiwidCI6IjNlZDQ4MDA3LTIzYmEtNDdhNi1iNDRjLTMyNmRlYmJiZDMxZCJ9";
+
 const PurchasesDashboard = () => {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   const isAdmin  = userData?.role === 'Admin';
@@ -21,14 +23,16 @@ const PurchasesDashboard = () => {
             <p>Suivez l'activité d'achat et les performances des fournisseurs.</p>
           </div>
           <div className="powerbi-section">
-            <div className="powerbi-header">
-              <h2>Dashboard Achats — Power BI</h2>
-              <span className="powerbi-badge"><span className="powerbi-badge-dot" />En attente d'intégration</span>
-            </div>
-            <div className="powerbi-body">
-              <div className="powerbi-icon icon-achats">🛒</div>
-              <h3>Dashboard des Achats</h3>
-              <p>L'intégration Power BI sera disponible prochainement.</p>
+            <div className="powerbi-iframe-wrapper">
+              <iframe
+                title="Dashboard Achats"
+                src={POWERBI_URL_ACHATS}
+                width="100%"
+                height="600"
+                frameBorder="0"
+                allowFullScreen
+                style={{ borderRadius: '8px', border: 'none', display: 'block' }}
+              />
             </div>
           </div>
           {userData?.name && !isAdmin && <NotificationSender section="Achats" />}

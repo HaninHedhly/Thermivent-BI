@@ -7,7 +7,6 @@ import Chatbot from '../components/Chatbot';
 import '../styles/Web.css';
 import '../styles/UserManagement.css';
 
-// Modales feedback
 const ModalErreur = ({ message, onClose }) => (
   <div className="um-overlay" onClick={onClose}>
     <div className="um-modal" onClick={e => e.stopPropagation()}>
@@ -58,7 +57,7 @@ const UserManagement = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', role: 'Responsable Stock',
+    name: '', email: '', phone: '',
     motDePasse: '', confirmerMotDePasse: '', photo: '',
     access: { ventes: false, achats: false, stocks: false, production: false }
   });
@@ -76,30 +75,22 @@ const UserManagement = () => {
     const matchSearch = search === '' ||
       (user.name || '').toLowerCase().includes(search.toLowerCase()) ||
       (user.email || '').toLowerCase().includes(search.toLowerCase());
-    const matchRole = selectedRoles.length === 0 || selectedRoles.includes(user.role);
     const matchAccess = selectedAccess.length === 0 || selectedAccess.some(acc =>
       user.access && user.access[acc.toLowerCase()] === true);
-    return matchSearch && matchRole && matchAccess;
+    return matchSearch && matchAccess;
   });
 
   const stats = useMemo(() => ({
     total: users.length,
-    admins: users.filter(u => u.role === 'Admin').length,
-    employes: users.filter(u => 
-      u.role === 'Employé' ||
-      u.role === 'Responsable Stock' ||
-      u.role === 'Responsable Achat' ||
-      u.role === 'Responsable Vente' ||
-      u.role === 'Responsable Production'
-    ).length,
+    avecAcces: users.filter(u => u.access && Object.values(u.access).some(v => v === true)).length,
+    sansAcces: users.filter(u => !u.access || Object.values(u.access).every(v => v === false)).length,
   }), [users]);
 
-  // Indicateur de force du mot de passe
   const getPwdStrength = (pwd) => {
     if (!pwd) return null;
     if (pwd.length < 6) return { label: 'Trop court', color: '#EF4444', width: '30%' };
     if (pwd.length < 8) return { label: 'Faible', color: '#F59E0B', width: '50%' };
-    if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) 
+    if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd))
       return { label: 'Fort', color: '#10B981', width: '100%' };
     return { label: 'Moyen', color: '#3B82F6', width: '75%' };
   };
@@ -113,17 +104,17 @@ const UserManagement = () => {
       { bg: '#3B82F6', color: '#FFF' }, { bg: '#10B981', color: '#FFF' },
     ];
     const theme = colors[c.charCodeAt(0) % colors.length];
-    return { 
-      width: '36px', height: '36px', borderRadius: '50%', 
+    return {
+      width: '36px', height: '36px', borderRadius: '50%',
       background: theme.bg, color: theme.color,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontWeight: 'bold', fontSize: '14px' 
+      fontWeight: 'bold', fontSize: '14px'
     };
   };
 
   const handleExportExcel = () => {
-    const csv = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE,RÔLE\n" +
-      filteredUsers.map(e => `${e.name||''},${e.email||''},${e.phone||''},${e.role||''}`).join('\n');
+    const csv = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE\n" +
+      filteredUsers.map(e => `${e.name||''},${e.email||''},${e.phone||''}`).join('\n');
     const link = document.createElement('a');
     link.setAttribute('href', encodeURI(csv));
     link.setAttribute('download', 'utilisateurs.csv');
@@ -142,7 +133,6 @@ const UserManagement = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Nom
     if (!formData.name.trim()) {
       setErreurMsg('Le nom est obligatoire.'); return;
     }
@@ -153,16 +143,15 @@ const UserManagement = () => {
       setErreurMsg('Le nom ne doit pas contenir de chiffres.'); return;
     }
 
-    // Email — uniquement @thermivent.com
     if (!formData.email.trim()) {
       setErreurMsg("L'email est obligatoire."); return;
     }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@thermivent\.tn$/i;
+    // ✅ Validation @thermivent.com
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@thermivent\.com$/i;
     if (!emailRegex.test(formData.email.trim())) {
-      setErreurMsg("L'email doit être une adresse @thermivent.tn (ex: nom.prenom@thermivent.tn)."); return;
+      setErreurMsg("L'email doit être une adresse @thermivent.com (ex: prenom.nom@thermivent.com)."); return;
     }
 
-    // Téléphone — tunisien : +216 suivi de 8 chiffres (optionnel)
     if (formData.phone.trim()) {
       const phoneRegex = /^\+216[0-9]{8}$/;
       if (!phoneRegex.test(formData.phone.trim())) {
@@ -170,7 +159,6 @@ const UserManagement = () => {
       }
     }
 
-    // Mot de passe
     if (!currentUser) {
       if (!formData.motDePasse) {
         setErreurMsg('Le mot de passe est obligatoire.'); return;
@@ -233,10 +221,10 @@ const UserManagement = () => {
 
   const openAddModal = () => {
     setCurrentUser(null);
-    setFormData({ 
-      name:'', email:'', phone:'', role: 'Responsable Stock',
-      motDePasse:'', confirmerMotDePasse:'', photo:'',
-      access:{ ventes:false, achats:false, stocks:false, production:false } 
+    setFormData({
+      name: '', email: '', phone: '',
+      motDePasse: '', confirmerMotDePasse: '', photo: '',
+      access: { ventes: false, achats: false, stocks: false, production: false }
     });
     setShowPwd(false); setShowConfirm(false);
     setShowModal(true);
@@ -251,7 +239,6 @@ const UserManagement = () => {
     Edit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
     Trash: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
     ArrowUp: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="18 15 12 9 6 15"/></svg>,
-    ArrowDown: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg>,
     Users: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
     Shield: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     UserTie: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -259,16 +246,16 @@ const UserManagement = () => {
     EyeOff: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
   };
 
-  const IS = { 
+  const IS = {
     width: '100%', padding: '13px 16px', fontSize: '15px',
     border: '1.5px solid #E2E8F0', borderRadius: '12px',
     outline: 'none', fontFamily: 'inherit', background: '#FAFBFC',
-    boxSizing: 'border-box' 
+    boxSizing: 'border-box'
   };
 
-  const LS = { 
+  const LS = {
     display: 'block', fontWeight: '600', color: '#0F2038',
-    marginBottom: '7px', fontSize: '14px' 
+    marginBottom: '7px', fontSize: '14px'
   };
 
   const pwdWrap = { position: 'relative', display: 'flex', alignItems: 'center' };
@@ -287,15 +274,15 @@ const UserManagement = () => {
         <div className="top-navbar">
           <div className="search-container">
             <Icons.Search />
-            <input type="text" placeholder="Rechercher un utilisateur..." className="search-input" 
+            <input type="text" placeholder="Rechercher un utilisateur..." className="search-input"
               value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="top-right">
             <div className="bell-icon"><Icons.Bell /></div>
             <div className="user-profile">
-              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User" 
-                style={{ width:'36px', height:'36px', borderRadius:'50%' }} />
-              <div className="user-info"><p>Admin User</p><span>admin@company.tn</span></div>
+              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User"
+                style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+              <div className="user-info"><p>Admin User</p><span>admin@thermivent.com</span></div>
             </div>
           </div>
         </div>
@@ -318,24 +305,23 @@ const UserManagement = () => {
             </div>
             <div className="stat-card">
               <div className="stat-info">
-                <p className="stat-title">Admins</p>
-                <h2 className="stat-value">{stats.admins}</h2>
+                <p className="stat-title">Avec accès dashboards</p>
+                <h2 className="stat-value">{stats.avecAcces}</h2>
                 <span className="stat-trend trend-up"><Icons.ArrowUp /> +8%</span>
               </div>
               <div className="stat-icon"><Icons.Shield /></div>
             </div>
             <div className="stat-card">
               <div className="stat-info">
-                <p className="stat-title">Employés</p>
-                <h2 className="stat-value">{stats.employes}</h2>
-                <span className="stat-trend trend-up"><Icons.ArrowUp /> +15%</span>
+                <p className="stat-title">Sans accès</p>
+                <h2 className="stat-value">{stats.sansAcces}</h2>
               </div>
               <div className="stat-icon"><Icons.UserTie /></div>
             </div>
           </div>
 
           {/* Boutons */}
-          <div style={{ display:'flex', gap:'12px', marginBottom:'32px', flexWrap:'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <button onClick={openAddModal} className="btn-primary">
               <Icons.Plus /> Ajouter utilisateur
             </button>
@@ -347,37 +333,32 @@ const UserManagement = () => {
             </button>
           </div>
 
-          {/* Tableau */}
+          {/* Tableau — sans colonne RÔLE */}
           <div className="table-container">
             <table>
               <thead>
                 <tr>
                   <th>PHOTO</th><th>NOM</th><th>EMAIL</th>
-                  <th>TÉLÉPHONE</th><th>RÔLE</th>
+                  <th>TÉLÉPHONE</th>
                   <th>ACCÈS DASHBOARDS</th><th>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.length === 0 ? (
-                  <tr><td colSpan="7" style={{ textAlign:'center', padding:'40px', color:'#94A3B8' }}>Aucun utilisateur</td></tr>
+                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>Aucun utilisateur</td></tr>
                 ) : filteredUsers.map(user => (
                   <tr key={user._id}>
                     <td>
-                      {user.photo ? 
-                        <img src={user.photo} alt="photo" style={{ width:'36px', height:'36px', borderRadius:'50%', objectFit:'cover' }} /> 
-                        : <div style={getAvatarStyle(user.name)}>{(user.name||'??').substring(0,2).toUpperCase()}</div>
+                      {user.photo ?
+                        <img src={user.photo} alt="photo" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+                        : <div style={getAvatarStyle(user.name)}>{(user.name || '??').substring(0, 2).toUpperCase()}</div>
                       }
                     </td>
-                    <td><strong>{user.name||'-'}</strong></td>
-                    <td>{user.email||'-'}</td>
-                    <td>{user.phone||'-'}</td>
+                    <td><strong>{user.name || '-'}</strong></td>
+                    <td>{user.email || '-'}</td>
+                    <td>{user.phone || '-'}</td>
                     <td>
-                      <span className={`badge role-${user.role.replace(/\s+/g, '')}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      {Object.keys(user.access||{}).map(acc => 
+                      {Object.keys(user.access || {}).map(acc =>
                         user.access[acc] ? (
                           <span key={acc} className={`badge access-badge ${acc}`}>
                             {acc.charAt(0).toUpperCase() + acc.slice(1)}
@@ -396,43 +377,45 @@ const UserManagement = () => {
           </div>
         </div>
 
-        {/* Modal Formulaire */}
+        {/* Modal Formulaire — sans champ Rôle */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div onClick={e => e.stopPropagation()} style={{
-              width:'560px', maxWidth:'95%', maxHeight:'92vh', overflowY:'auto',
-              background:'white', borderRadius:'24px', boxShadow:'0 35px 80px -20px rgba(15,32,56,0.3)', 
-              padding:'40px 38px'
+              width: '560px', maxWidth: '95%', maxHeight: '92vh', overflowY: 'auto',
+              background: 'white', borderRadius: '24px', boxShadow: '0 35px 80px -20px rgba(15,32,56,0.3)',
+              padding: '40px 38px'
             }}>
-              <h2 style={{ margin:'0 0 28px', color:'#0F2038', fontSize:'23px', fontWeight:'700', textAlign:'center' }}>
+              <h2 style={{ margin: '0 0 28px', color: '#0F2038', fontSize: '23px', fontWeight: '700', textAlign: 'center' }}>
                 {currentUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
               </h2>
 
               <form onSubmit={handleSaveUser} noValidate>
                 {/* Photo */}
-                <div style={{ display:'flex', justifyContent:'center', marginBottom:'24px' }}>
-                  <div style={{ textAlign:'center' }}>
-                    {formData.photo ? 
-                      <img src={formData.photo} alt="p" style={{ width:'96px', height:'96px', borderRadius:'50%', objectFit:'cover', border:'5px solid #F1F5F9' }} /> 
-                      : <div style={{ width:'96px', height:'96px', borderRadius:'50%', background:'#F8FAFC', display:'flex', alignItems:'center', justifyContent:'center', border:'5px solid #F1F5F9', fontSize:'40px' }}>👤</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    {formData.photo ?
+                      <img src={formData.photo} alt="p" style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '5px solid #F1F5F9' }} />
+                      : <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '5px solid #F1F5F9', fontSize: '40px' }}>👤</div>
                     }
-                    <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ marginTop:'10px', fontSize:'13px', color:'#64748B' }} />
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ marginTop: '10px', fontSize: '13px', color: '#64748B' }} />
                   </div>
                 </div>
 
-                {/* Nom, Email, Téléphone */}
-                <div style={{ marginBottom:'15px' }}>
-                  <label style={LS}>Nom complet <span style={{ color:'#EF4444' }}>*</span></label>
-                  <input type="text" style={IS} value={formData.name} onChange={e => setFormData(f => ({...f, name:e.target.value}))} />
+                {/* Nom */}
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={LS}>Nom complet <span style={{ color: '#EF4444' }}>*</span></label>
+                  <input type="text" style={IS} value={formData.name}
+                    onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} />
                 </div>
 
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'15px' }}>
+                {/* Email + Téléphone */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '15px' }}>
                   <div>
-                    <label style={LS}>Email <span style={{ color:'#EF4444' }}>*</span></label>
+                    <label style={LS}>Email <span style={{ color: '#EF4444' }}>*</span></label>
                     <input
                       type="email"
                       style={IS}
-                      placeholder="prenom.nom@thermivent.tn"
+                      placeholder="prenom.nom@thermivent.com"
                       value={formData.email}
                       onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
                     />
@@ -454,25 +437,24 @@ const UserManagement = () => {
                   </div>
                 </div>
 
-                {/* Mot de passe avec indicateur de force */}
-                <div style={{ marginBottom:'15px' }}>
+                {/* Mot de passe */}
+                <div style={{ marginBottom: '15px' }}>
                   <label style={LS}>
-                    Mot de passe {!currentUser && <span style={{ color:'#EF4444' }}>*</span>}
-                    {currentUser && <span style={{ color:'#94A3B8', fontSize:'12px', marginLeft:'6px' }}>(vide = inchangé)</span>}
+                    Mot de passe {!currentUser && <span style={{ color: '#EF4444' }}>*</span>}
+                    {currentUser && <span style={{ color: '#94A3B8', fontSize: '12px', marginLeft: '6px' }}>(vide = inchangé)</span>}
                   </label>
                   <div style={pwdWrap}>
                     <input
                       type={showPwd ? 'text' : 'password'}
-                      style={{ ...IS, paddingRight:'44px' }}
+                      style={{ ...IS, paddingRight: '44px' }}
                       placeholder={currentUser ? '••••••••' : 'Minimum 6 caractères'}
                       value={formData.motDePasse}
-                      onChange={e => setFormData(f => ({...f, motDePasse:e.target.value}))}
+                      onChange={e => setFormData(f => ({ ...f, motDePasse: e.target.value }))}
                     />
                     <button type="button" style={eyeBtn} onClick={() => setShowPwd(v => !v)}>
                       {showPwd ? <Icons.EyeOff /> : <Icons.Eye />}
                     </button>
                   </div>
-
                   {formData.motDePasse && strength && (
                     <div style={{ marginTop: '8px' }}>
                       <div style={{ height: '5px', background: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
@@ -487,19 +469,19 @@ const UserManagement = () => {
 
                 {/* Confirmer mot de passe */}
                 {(formData.motDePasse || !currentUser) && (
-                  <div style={{ marginBottom:'15px' }}>
-                    <label style={LS}>Confirmer le mot de passe {!currentUser && <span style={{ color:'#EF4444' }}>*</span>}</label>
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={LS}>Confirmer le mot de passe {!currentUser && <span style={{ color: '#EF4444' }}>*</span>}</label>
                     <div style={pwdWrap}>
                       <input
                         type={showConfirm ? 'text' : 'password'}
                         style={{
-                          ...IS, paddingRight:'44px',
-                          borderColor: formData.confirmerMotDePasse ? 
+                          ...IS, paddingRight: '44px',
+                          borderColor: formData.confirmerMotDePasse ?
                             (formData.confirmerMotDePasse === formData.motDePasse ? '#10B981' : '#EF4444') : '#E2E8F0'
                         }}
                         placeholder="Répétez le mot de passe"
                         value={formData.confirmerMotDePasse}
-                        onChange={e => setFormData(f => ({...f, confirmerMotDePasse:e.target.value}))}
+                        onChange={e => setFormData(f => ({ ...f, confirmerMotDePasse: e.target.value }))}
                       />
                       <button type="button" style={eyeBtn} onClick={() => setShowConfirm(v => !v)}>
                         {showConfirm ? <Icons.EyeOff /> : <Icons.Eye />}
@@ -508,73 +490,46 @@ const UserManagement = () => {
                   </div>
                 )}
 
-                {/* Rôle - Style amélioré */}
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={LS}>Rôle <span style={{ color: '#EF4444' }}>*</span></label>
-                  <select 
-                    style={{ 
-                      ...IS, 
-                      background: 'white', 
-                      fontWeight: '500',
-                      cursor: 'pointer'
-                    }} 
-                    value={formData.role}
-                    onChange={e => setFormData(f => ({...f, role: e.target.value}))}
-                  >
-                    <option value="Admin">Admin</option>
-                    <option value="Responsable Stock">Responsable Stock</option>
-                    <option value="Responsable Achat">Responsable Achat</option>
-                    <option value="Responsable Vente">Responsable Vente</option>
-                    <option value="Responsable Production">Responsable Production</option>
-                  </select>
+                {/* Accès dashboards */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={LS}>Accès aux dashboards</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {['ventes', 'achats', 'stocks', 'production'].map(acc => {
+                      const bg = { ventes: '#D1FAE5', achats: '#DBEAFE', stocks: '#FFEDD5', production: '#F3E8FF' };
+                      const checked = formData.access[acc];
+                      return (
+                        <label key={acc} style={{
+                          background: checked ? bg[acc] : '#F8FAFC',
+                          padding: '12px 16px', borderRadius: '12px', display: 'flex',
+                          alignItems: 'center', gap: '10px', cursor: 'pointer',
+                          border: `1.5px solid ${checked ? '#CBD5E1' : '#E2E8F0'}`,
+                          transition: 'all 0.15s'
+                        }}>
+                          <input type="checkbox" checked={checked}
+                            onChange={e => setFormData(f => ({
+                              ...f, access: { ...f.access, [acc]: e.target.checked }
+                            }))}
+                            style={{ width: '16px', height: '16px', accentColor: '#0F2038', cursor: 'pointer' }} />
+                          <span style={{ fontWeight: '600', fontSize: '14px' }}>
+                            {acc.charAt(0).toUpperCase() + acc.slice(1)}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Accès dashboards */}
-                {formData.role !== 'Admin' ? (
-                  <div style={{ marginBottom:'24px' }}>
-                    <label style={LS}>Accès aux dashboards</label>
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
-                      {['ventes','achats','stocks','production'].map(acc => {
-                        const bg = { ventes:'#D1FAE5', achats:'#DBEAFE', stocks:'#FFEDD5', production:'#F3E8FF' };
-                        const checked = formData.access[acc];
-                        return (
-                          <label key={acc} style={{ 
-                            background: checked ? bg[acc] : '#F8FAFC',
-                            padding:'12px 16px', borderRadius:'12px', display:'flex',
-                            alignItems:'center', gap:'10px', cursor:'pointer',
-                            border: `1.5px solid ${checked ? '#CBD5E1' : '#E2E8F0'}`, 
-                            transition:'all 0.15s' 
-                          }}>
-                            <input type="checkbox" checked={checked}
-                              onChange={e => setFormData(f => ({
-                                ...f, access:{ ...f.access, [acc]: e.target.checked }
-                              }))}
-                              style={{ width:'16px', height:'16px', accentColor:'#0F2038', cursor:'pointer' }} />
-                            <span style={{ fontWeight:'600', fontSize:'14px' }}>
-                              {acc.charAt(0).toUpperCase() + acc.slice(1)}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ marginBottom:'24px', padding:'12px 16px', borderRadius:'12px',
-                    background:'#EFF6FF', border:'1.5px solid #BFDBFE', color:'#1D4ED8',
-                    fontSize:'13px', fontWeight:'500', display:'flex', alignItems:'center', gap:'8px' }}>
-                    Les Admins ont automatiquement accès à toutes les pages.
-                  </div>
-                )}
-
-                <div style={{ display:'flex', gap:'14px' }}>
+                <div style={{ display: 'flex', gap: '14px' }}>
                   <button type="button" onClick={() => setShowModal(false)} style={{
-                    flex:1, padding:'14px', borderRadius:'12px', border:'1.5px solid #E2E8F0',
-                    background:'white', fontWeight:'600', fontSize:'15px', cursor:'pointer' }}>
+                    flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #E2E8F0',
+                    background: 'white', fontWeight: '600', fontSize: '15px', cursor: 'pointer'
+                  }}>
                     Annuler
                   </button>
                   <button type="submit" style={{
-                    flex:1, padding:'14px', borderRadius:'12px', border:'none',
-                    background:'#0F2038', color:'white', fontWeight:'600', fontSize:'15px', cursor:'pointer' }}>
+                    flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
+                    background: '#0F2038', color: 'white', fontWeight: '600', fontSize: '15px', cursor: 'pointer'
+                  }}>
                     {currentUser ? 'Mettre à jour' : 'Enregistrer'}
                   </button>
                 </div>
@@ -586,12 +541,12 @@ const UserManagement = () => {
         {showDeleteModal && (
           <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2 style={{ color:'#EF4444', marginTop:0 }}>Confirmer la suppression</h2>
-              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name||'cet utilisateur'}</strong> ?</p>
-              <p style={{ color:'#828282', fontSize:'14px' }}>Cette action est irréversible.</p>
-              <div style={{ display:'flex', gap:'15px', marginTop:'30px' }}>
-                <button className="btn-secondary" style={{ flex:1 }} onClick={() => setShowDeleteModal(false)}>Annuler</button>
-                <button className="btn-primary" style={{ flex:1, backgroundColor:'#EF4444' }} onClick={confirmDelete}>Supprimer</button>
+              <h2 style={{ color: '#EF4444', marginTop: 0 }}>Confirmer la suppression</h2>
+              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name || 'cet utilisateur'}</strong> ?</p>
+              <p style={{ color: '#828282', fontSize: '14px' }}>Cette action est irréversible.</p>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
+                <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteModal(false)}>Annuler</button>
+                <button className="btn-primary" style={{ flex: 1, backgroundColor: '#EF4444' }} onClick={confirmDelete}>Supprimer</button>
               </div>
             </div>
           </div>
@@ -601,12 +556,12 @@ const UserManagement = () => {
         {succesMsg && <ModalSucces message={succesMsg} onClose={() => setSuccesMsg('')} />}
 
         {showFilterBar && (
-          <FilterDrawer 
+          <FilterDrawer
             onClose={() => setShowFilterBar(false)}
-            selectedRoles={selectedRoles} 
+            selectedRoles={selectedRoles}
             setSelectedRoles={setSelectedRoles}
-            selectedAccess={selectedAccess} 
-            setSelectedAccess={setSelectedAccess} 
+            selectedAccess={selectedAccess}
+            setSelectedAccess={setSelectedAccess}
           />
         )}
       </div>
