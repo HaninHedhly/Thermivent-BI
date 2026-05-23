@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+
 // GET tous les utilisateurs
 exports.getUsers = async (req, res) => {
   try {
@@ -19,7 +20,7 @@ exports.createUser = async (req, res) => {
 
     const data = { ...req.body };
 
-    // Si Admin → accès total automatique (même si l'admin oublie de cocher)
+    // Si Admin → accès total automatique
     if (data.role === 'Admin') {
       data.access = { ventes: true, achats: true, stocks: true, production: true };
     }
@@ -44,6 +45,11 @@ exports.updateUser = async (req, res) => {
     const user = await User.findById(req.params.id).select('+motDePasse');
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
+    // Empêcher le changement de rôle de l'admin principal
+    if (user.email === 'admin@thermivent.com' && role && role !== 'Admin') {
+      return res.status(403).json({ message: 'Impossible de modifier le rôle du compte admin principal' });
+    }
+
     if (motDePasse) {
       if (!ancienMotDePasse) {
         return res.status(400).json({ message: "L'ancien mot de passe est requis." });
@@ -51,7 +57,6 @@ exports.updateUser = async (req, res) => {
 
       const estValide = await bcrypt.compare(ancienMotDePasse, user.motDePasse);
       if (!estValide) {
-        // Utiliser 400 ici pour que l'intercepteur axios.js ne te déconnecte pas
         return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
       }
       user.motDePasse = motDePasse;
@@ -73,10 +78,10 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 // DELETE supprimer un utilisateur
 exports.deleteUser = async (req, res) => {
   try {
-    // Empêcher la suppression du compte admin principal
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 

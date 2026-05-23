@@ -57,8 +57,13 @@ const UserManagement = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '',
-    motDePasse: '', confirmerMotDePasse: '', photo: '',
+    name: '', 
+    email: '', 
+    phone: '',
+    role: 'Employé',
+    motDePasse: '', 
+    confirmerMotDePasse: '', 
+    photo: '',
     access: { ventes: false, achats: false, stocks: false, production: false }
   });
 
@@ -68,16 +73,22 @@ const UserManagement = () => {
     try {
       const res = await fetchUsers();
       setUsers(res.data);
-    } catch (err) { console.error('Erreur chargement:', err); }
+    } catch (err) { 
+      console.error('Erreur chargement:', err); 
+    }
   };
 
   const filteredUsers = users.filter(user => {
     const matchSearch = search === '' ||
       (user.name || '').toLowerCase().includes(search.toLowerCase()) ||
       (user.email || '').toLowerCase().includes(search.toLowerCase());
-    const matchAccess = selectedAccess.length === 0 || selectedAccess.some(acc =>
+
+    const matchRole = selectedRoles.length === 0 || selectedRoles.includes(user.role);
+    
+    const matchAccess = selectedAccess.length === 0 || selectedAccess.some(acc => 
       user.access && user.access[acc.toLowerCase()] === true);
-    return matchSearch && matchAccess;
+
+    return matchSearch && matchRole && matchAccess;
   });
 
   const stats = useMemo(() => ({
@@ -100,8 +111,10 @@ const UserManagement = () => {
   const getAvatarStyle = (name) => {
     const c = ((name || '').trim()[0] || 'U');
     const colors = [
-      { bg: '#F59E0B', color: '#FFF' }, { bg: '#8B5CF6', color: '#FFF' },
-      { bg: '#3B82F6', color: '#FFF' }, { bg: '#10B981', color: '#FFF' },
+      { bg: '#F59E0B', color: '#FFF' }, 
+      { bg: '#8B5CF6', color: '#FFF' },
+      { bg: '#3B82F6', color: '#FFF' }, 
+      { bg: '#10B981', color: '#FFF' },
     ];
     const theme = colors[c.charCodeAt(0) % colors.length];
     return {
@@ -113,12 +126,14 @@ const UserManagement = () => {
   };
 
   const handleExportExcel = () => {
-    const csv = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE\n" +
-      filteredUsers.map(e => `${e.name||''},${e.email||''},${e.phone||''}`).join('\n');
+    const csv = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE,RÔLE\n" +
+      filteredUsers.map(e => `${e.name||''},${e.email||''},${e.phone||''},${e.role||''}`).join('\n');
     const link = document.createElement('a');
     link.setAttribute('href', encodeURI(csv));
     link.setAttribute('download', 'utilisateurs.csv');
-    document.body.appendChild(link); link.click(); link.remove();
+    document.body.appendChild(link); 
+    link.click(); 
+    link.remove();
   };
 
   const handlePhotoUpload = (e) => {
@@ -146,16 +161,15 @@ const UserManagement = () => {
     if (!formData.email.trim()) {
       setErreurMsg("L'email est obligatoire."); return;
     }
-    // ✅ Validation @thermivent.com
     const emailRegex = /^[a-zA-Z0-9._%+-]+@thermivent\.com$/i;
     if (!emailRegex.test(formData.email.trim())) {
-      setErreurMsg("L'email doit être une adresse @thermivent.com (ex: prenom.nom@thermivent.com)."); return;
+      setErreurMsg("L'email doit être une adresse @thermivent.com"); return;
     }
 
     if (formData.phone.trim()) {
       const phoneRegex = /^\+216[0-9]{8}$/;
       if (!phoneRegex.test(formData.phone.trim())) {
-        setErreurMsg('Le numéro doit être au format tunisien : +216XXXXXXXX (8 chiffres après +216).'); return;
+        setErreurMsg('Le numéro doit être au format : +216XXXXXXXX'); return;
       }
     }
 
@@ -169,14 +183,12 @@ const UserManagement = () => {
       if (formData.motDePasse !== formData.confirmerMotDePasse) {
         setErreurMsg('Les mots de passe ne correspondent pas.'); return;
       }
-    } else {
-      if (formData.motDePasse) {
-        if (formData.motDePasse.length < 6) {
-          setErreurMsg('Le mot de passe doit contenir au moins 6 caractères.'); return;
-        }
-        if (formData.motDePasse !== formData.confirmerMotDePasse) {
-          setErreurMsg('Les mots de passe ne correspondent pas.'); return;
-        }
+    } else if (formData.motDePasse) {
+      if (formData.motDePasse.length < 6) {
+        setErreurMsg('Le mot de passe doit contenir au moins 6 caractères.'); return;
+      }
+      if (formData.motDePasse !== formData.confirmerMotDePasse) {
+        setErreurMsg('Les mots de passe ne correspondent pas.'); return;
       }
     }
 
@@ -186,15 +198,13 @@ const UserManagement = () => {
     try {
       if (currentUser) {
         await updateUser(currentUser._id, dataToSend);
-        setShowModal(false);
-        loadUsers();
         setSuccesMsg('Utilisateur mis à jour avec succès !');
       } else {
         await createUser(dataToSend);
-        setShowModal(false);
-        loadUsers();
-        setSuccesMsg(`Compte créé pour "${formData.name}". Il peut maintenant se connecter.`);
+        setSuccesMsg(`Compte créé pour "${formData.name}".`);
       }
+      setShowModal(false);
+      loadUsers();
     } catch (err) {
       setErreurMsg(err.response?.data?.message || "Erreur lors de l'enregistrement.");
     }
@@ -214,19 +224,30 @@ const UserManagement = () => {
 
   const openEditModal = (user) => {
     setCurrentUser(user);
-    setFormData({ ...user, motDePasse: '', confirmerMotDePasse: '' });
-    setShowPwd(false); setShowConfirm(false);
+    setFormData({ 
+      ...user, 
+      motDePasse: '', 
+      confirmerMotDePasse: '' 
+    });
+    setShowPwd(false); 
+    setShowConfirm(false);
     setShowModal(true);
   };
 
   const openAddModal = () => {
     setCurrentUser(null);
     setFormData({
-      name: '', email: '', phone: '',
-      motDePasse: '', confirmerMotDePasse: '', photo: '',
+      name: '', 
+      email: '', 
+      phone: '',
+      role: 'Employé',
+      motDePasse: '', 
+      confirmerMotDePasse: '', 
+      photo: '',
       access: { ventes: false, achats: false, stocks: false, production: false }
     });
-    setShowPwd(false); setShowConfirm(false);
+    setShowPwd(false); 
+    setShowConfirm(false);
     setShowModal(true);
   };
 
@@ -246,24 +267,11 @@ const UserManagement = () => {
     EyeOff: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
   };
 
-  const IS = {
-    width: '100%', padding: '13px 16px', fontSize: '15px',
-    border: '1.5px solid #E2E8F0', borderRadius: '12px',
-    outline: 'none', fontFamily: 'inherit', background: '#FAFBFC',
-    boxSizing: 'border-box'
-  };
-
-  const LS = {
-    display: 'block', fontWeight: '600', color: '#0F2038',
-    marginBottom: '7px', fontSize: '14px'
-  };
+  const IS = { width: '100%', padding: '13px 16px', fontSize: '15px', border: '1.5px solid #E2E8F0', borderRadius: '12px', outline: 'none', background: '#FAFBFC' };
+  const LS = { display: 'block', fontWeight: '600', color: '#0F2038', marginBottom: '7px', fontSize: '14px' };
 
   const pwdWrap = { position: 'relative', display: 'flex', alignItems: 'center' };
-  const eyeBtn = {
-    position: 'absolute', right: '14px', background: 'none',
-    border: 'none', cursor: 'pointer', color: '#94A3B8',
-    padding: 0, display: 'flex', alignItems: 'center',
-  };
+  const eyeBtn = { position: 'absolute', right: '14px', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' };
 
   return (
     <div className="dashboard-layout">
@@ -280,8 +288,7 @@ const UserManagement = () => {
           <div className="top-right">
             <div className="bell-icon"><Icons.Bell /></div>
             <div className="user-profile">
-              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User"
-                style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
               <div className="user-info"><p>Admin User</p><span>admin@thermivent.com</span></div>
             </div>
           </div>
@@ -299,7 +306,6 @@ const UserManagement = () => {
               <div className="stat-info">
                 <p className="stat-title">Total Utilisateurs</p>
                 <h2 className="stat-value">{stats.total}</h2>
-                <span className="stat-trend trend-up"><Icons.ArrowUp /> +12%</span>
               </div>
               <div className="stat-icon"><Icons.Users /></div>
             </div>
@@ -307,7 +313,6 @@ const UserManagement = () => {
               <div className="stat-info">
                 <p className="stat-title">Avec accès dashboards</p>
                 <h2 className="stat-value">{stats.avecAcces}</h2>
-                <span className="stat-trend trend-up"><Icons.ArrowUp /> +8%</span>
               </div>
               <div className="stat-icon"><Icons.Shield /></div>
             </div>
@@ -333,30 +338,46 @@ const UserManagement = () => {
             </button>
           </div>
 
-          {/* Tableau — sans colonne RÔLE */}
+          {/* Tableau */}
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>PHOTO</th><th>NOM</th><th>EMAIL</th>
+                  <th>PHOTO</th>
+                  <th>NOM</th>
+                  <th>EMAIL</th>
                   <th>TÉLÉPHONE</th>
-                  <th>ACCÈS DASHBOARDS</th><th>ACTIONS</th>
+                  <th>RÔLE</th>
+                  <th>ACCÈS DASHBOARDS</th>
+                  <th>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>Aucun utilisateur</td></tr>
+                                  {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
+                      Aucun utilisateur trouvé
+                    </td>
+                  </tr>
                 ) : filteredUsers.map(user => (
                   <tr key={user._id}>
                     <td>
-                      {user.photo ?
+                      {user.photo ? (
                         <img src={user.photo} alt="photo" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
-                        : <div style={getAvatarStyle(user.name)}>{(user.name || '??').substring(0, 2).toUpperCase()}</div>
-                      }
+                      ) : (
+                        <div style={getAvatarStyle(user.name)}>
+                          {(user.name || '??').substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
                     </td>
                     <td><strong>{user.name || '-'}</strong></td>
                     <td>{user.email || '-'}</td>
                     <td>{user.phone || '-'}</td>
+                    <td>
+                      <span className={`badge role-badge ${user.role === 'Admin' ? 'admin' : 'employe'}`}>
+                        {user.role}
+                      </span>
+                    </td>
                     <td>
                       {Object.keys(user.access || {}).map(acc =>
                         user.access[acc] ? (
@@ -367,8 +388,23 @@ const UserManagement = () => {
                       )}
                     </td>
                     <td>
-                      <button className="action-btn" onClick={() => openEditModal(user)}><Icons.Edit /></button>
-                      <button className="action-btn" onClick={() => { setCurrentUser(user); setShowDeleteModal(true); }}><Icons.Trash /></button>
+                      {/* Masquer les boutons pour tous les Admins */}
+                      {user.role !== 'Admin' && (
+                        <>
+                          <button className="action-btn" onClick={() => openEditModal(user)}>
+                            <Icons.Edit />
+                          </button>
+                          <button 
+                            className="action-btn" 
+                            onClick={() => { 
+                              setCurrentUser(user); 
+                              setShowDeleteModal(true); 
+                            }}
+                          >
+                            <Icons.Trash />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -377,7 +413,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        {/* Modal Formulaire — sans champ Rôle */}
+        {/* Modal Formulaire */}
         {showModal && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div onClick={e => e.stopPropagation()} style={{
@@ -393,10 +429,11 @@ const UserManagement = () => {
                 {/* Photo */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
                   <div style={{ textAlign: 'center' }}>
-                    {formData.photo ?
-                      <img src={formData.photo} alt="p" style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '5px solid #F1F5F9' }} />
-                      : <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '5px solid #F1F5F9', fontSize: '40px' }}>👤</div>
-                    }
+                    {formData.photo ? (
+                      <img src={formData.photo} alt="photo" style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', border: '5px solid #F1F5F9' }} />
+                    ) : (
+                      <div style={{ width: '96px', height: '96px', borderRadius: '50%', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '5px solid #F1F5F9', fontSize: '40px' }}>👤</div>
+                    )}
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} style={{ marginTop: '10px', fontSize: '13px', color: '#64748B' }} />
                   </div>
                 </div>
@@ -404,53 +441,47 @@ const UserManagement = () => {
                 {/* Nom */}
                 <div style={{ marginBottom: '15px' }}>
                   <label style={LS}>Nom complet <span style={{ color: '#EF4444' }}>*</span></label>
-                  <input type="text" style={IS} value={formData.name}
-                    onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} />
+                  <input type="text" style={IS} value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} />
                 </div>
 
                 {/* Email + Téléphone */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '15px' }}>
                   <div>
                     <label style={LS}>Email <span style={{ color: '#EF4444' }}>*</span></label>
-                    <input
-                      type="email"
-                      style={IS}
-                      placeholder="prenom.nom@thermivent.com"
-                      value={formData.email}
-                      onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
-                    />
+                    <input type="email" style={IS} placeholder="prenom.nom@thermivent.com" value={formData.email} onChange={e => setFormData(f => ({ ...f, email: e.target.value }))} />
                   </div>
                   <div>
                     <label style={LS}>Téléphone</label>
-                    <input
-                      type="text"
-                      style={IS}
-                      placeholder="+21612345678"
-                      maxLength={12}
-                      value={formData.phone}
-                      onChange={e => {
-                        let val = e.target.value;
-                        if (val && !val.startsWith('+')) val = '+216' + val.replace(/\D/g, '');
-                        setFormData(f => ({ ...f, phone: val }));
-                      }}
-                    />
+                    <input type="text" style={IS} placeholder="+21612345678" maxLength={12} value={formData.phone} onChange={e => {
+                      let val = e.target.value;
+                      if (val && !val.startsWith('+')) val = '+216' + val.replace(/\D/g, '');
+                      setFormData(f => ({ ...f, phone: val }));
+                    }} />
                   </div>
                 </div>
 
-                {/* Mot de passe */}
+                {/* Rôle */}
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={LS}>Rôle <span style={{ color: '#EF4444' }}>*</span></label>
+                  <select
+                    style={IS}
+                    value={formData.role}
+                    onChange={e => setFormData(f => ({ ...f, role: e.target.value }))}
+                  >
+                    <option value="Employé">Employé</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+
+                {/* Mot de passe + Confirmation */}
+                {/* ... (le reste du code mot de passe reste identique) */}
                 <div style={{ marginBottom: '15px' }}>
                   <label style={LS}>
                     Mot de passe {!currentUser && <span style={{ color: '#EF4444' }}>*</span>}
                     {currentUser && <span style={{ color: '#94A3B8', fontSize: '12px', marginLeft: '6px' }}>(vide = inchangé)</span>}
                   </label>
                   <div style={pwdWrap}>
-                    <input
-                      type={showPwd ? 'text' : 'password'}
-                      style={{ ...IS, paddingRight: '44px' }}
-                      placeholder={currentUser ? '••••••••' : 'Minimum 6 caractères'}
-                      value={formData.motDePasse}
-                      onChange={e => setFormData(f => ({ ...f, motDePasse: e.target.value }))}
-                    />
+                    <input type={showPwd ? 'text' : 'password'} style={{ ...IS, paddingRight: '44px' }} placeholder={currentUser ? '••••••••' : 'Minimum 6 caractères'} value={formData.motDePasse} onChange={e => setFormData(f => ({ ...f, motDePasse: e.target.value }))} />
                     <button type="button" style={eyeBtn} onClick={() => setShowPwd(v => !v)}>
                       {showPwd ? <Icons.EyeOff /> : <Icons.Eye />}
                     </button>
@@ -460,29 +491,16 @@ const UserManagement = () => {
                       <div style={{ height: '5px', background: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: strength.width, background: strength.color, transition: 'all 0.3s' }} />
                       </div>
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: strength.color, marginTop: '4px', display: 'block' }}>
-                        {strength.label}
-                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: strength.color }}>{strength.label}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Confirmer mot de passe */}
                 {(formData.motDePasse || !currentUser) && (
-                  <div style={{ marginBottom: '15px' }}>
+                  <div style={{ marginBottom: '24px' }}>
                     <label style={LS}>Confirmer le mot de passe {!currentUser && <span style={{ color: '#EF4444' }}>*</span>}</label>
                     <div style={pwdWrap}>
-                      <input
-                        type={showConfirm ? 'text' : 'password'}
-                        style={{
-                          ...IS, paddingRight: '44px',
-                          borderColor: formData.confirmerMotDePasse ?
-                            (formData.confirmerMotDePasse === formData.motDePasse ? '#10B981' : '#EF4444') : '#E2E8F0'
-                        }}
-                        placeholder="Répétez le mot de passe"
-                        value={formData.confirmerMotDePasse}
-                        onChange={e => setFormData(f => ({ ...f, confirmerMotDePasse: e.target.value }))}
-                      />
+                      <input type={showConfirm ? 'text' : 'password'} style={{ ...IS, paddingRight: '44px', borderColor: formData.confirmerMotDePasse ? (formData.confirmerMotDePasse === formData.motDePasse ? '#10B981' : '#EF4444') : '#E2E8F0' }} placeholder="Répétez le mot de passe" value={formData.confirmerMotDePasse} onChange={e => setFormData(f => ({ ...f, confirmerMotDePasse: e.target.value }))} />
                       <button type="button" style={eyeBtn} onClick={() => setShowConfirm(v => !v)}>
                         {showConfirm ? <Icons.EyeOff /> : <Icons.Eye />}
                       </button>
@@ -502,17 +520,10 @@ const UserManagement = () => {
                           background: checked ? bg[acc] : '#F8FAFC',
                           padding: '12px 16px', borderRadius: '12px', display: 'flex',
                           alignItems: 'center', gap: '10px', cursor: 'pointer',
-                          border: `1.5px solid ${checked ? '#CBD5E1' : '#E2E8F0'}`,
-                          transition: 'all 0.15s'
+                          border: `1.5px solid ${checked ? '#CBD5E1' : '#E2E8F0'}`
                         }}>
-                          <input type="checkbox" checked={checked}
-                            onChange={e => setFormData(f => ({
-                              ...f, access: { ...f.access, [acc]: e.target.checked }
-                            }))}
-                            style={{ width: '16px', height: '16px', accentColor: '#0F2038', cursor: 'pointer' }} />
-                          <span style={{ fontWeight: '600', fontSize: '14px' }}>
-                            {acc.charAt(0).toUpperCase() + acc.slice(1)}
-                          </span>
+                          <input type="checkbox" checked={checked} onChange={e => setFormData(f => ({ ...f, access: { ...f.access, [acc]: e.target.checked } }))} />
+                          <span style={{ fontWeight: '600', fontSize: '14px' }}>{acc.charAt(0).toUpperCase() + acc.slice(1)}</span>
                         </label>
                       );
                     })}
@@ -520,16 +531,8 @@ const UserManagement = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '14px' }}>
-                  <button type="button" onClick={() => setShowModal(false)} style={{
-                    flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #E2E8F0',
-                    background: 'white', fontWeight: '600', fontSize: '15px', cursor: 'pointer'
-                  }}>
-                    Annuler
-                  </button>
-                  <button type="submit" style={{
-                    flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
-                    background: '#0F2038', color: 'white', fontWeight: '600', fontSize: '15px', cursor: 'pointer'
-                  }}>
+                  <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1.5px solid #E2E8F0', background: 'white', fontWeight: '600' }}>Annuler</button>
+                  <button type="submit" style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: '#0F2038', color: 'white', fontWeight: '600' }}>
                     {currentUser ? 'Mettre à jour' : 'Enregistrer'}
                   </button>
                 </div>
@@ -538,15 +541,16 @@ const UserManagement = () => {
           </div>
         )}
 
+        {/* Modales */}
         {showDeleteModal && (
           <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
               <h2 style={{ color: '#EF4444', marginTop: 0 }}>Confirmer la suppression</h2>
-              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name || 'cet utilisateur'}</strong> ?</p>
+              <p>Êtes-vous sûr de vouloir supprimer <strong>{currentUser?.name}</strong> ?</p>
               <p style={{ color: '#828282', fontSize: '14px' }}>Cette action est irréversible.</p>
               <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
-                <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowDeleteModal(false)}>Annuler</button>
-                <button className="btn-primary" style={{ flex: 1, backgroundColor: '#EF4444' }} onClick={confirmDelete}>Supprimer</button>
+                <button className="btn-secondary" onClick={() => setShowDeleteModal(false)}>Annuler</button>
+                <button className="btn-primary" style={{ backgroundColor: '#EF4444' }} onClick={confirmDelete}>Supprimer</button>
               </div>
             </div>
           </div>

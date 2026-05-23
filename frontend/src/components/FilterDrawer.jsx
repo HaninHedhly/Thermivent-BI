@@ -2,18 +2,11 @@ import React from 'react';
 import '../styles/Web.css';
 
 const FilterDrawer = ({ onClose, selectedRoles, setSelectedRoles, selectedAccess, setSelectedAccess }) => {
-  // Nouveaux rôles mis à jour
-  const roles = [
-    'Admin',
-    'Responsable Stock',
-    'Responsable Achat',
-    'Responsable Vente',
-    'Responsable Production'
-  ];
+
+  const roles = ['Admin', 'Employé'];
 
   const accessDashboards = ['Ventes', 'Achats', 'Stocks', 'Production'];
 
-  // Toggle logic for Roles
   const handleRoleToggle = (role) => {
     if (selectedRoles.includes(role)) {
       setSelectedRoles(selectedRoles.filter(r => r !== role));
@@ -22,7 +15,6 @@ const FilterDrawer = ({ onClose, selectedRoles, setSelectedRoles, selectedAccess
     }
   };
 
-  // Toggle logic for Access
   const handleAccessToggle = (access) => {
     if (selectedAccess.includes(access)) {
       setSelectedAccess(selectedAccess.filter(a => a !== access));
@@ -31,7 +23,6 @@ const FilterDrawer = ({ onClose, selectedRoles, setSelectedRoles, selectedAccess
     }
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setSelectedRoles([]);
     setSelectedAccess([]);
