@@ -7,6 +7,10 @@ import '../styles/Dashboard.css';
 
 const PurchasesDashboard = () => {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  // Topics autorisés dérivés des accès réels de l'utilisateur
+  const allowedTopics = Object.entries(userData?.access || {})
+    .filter(([, v]) => v === true)
+    .map(([k]) => k === 'stocks' ? 'stock' : k);
   const isAdmin  = userData?.role === 'Admin';
 
   const [dashboard, setDashboard]   = useState(null);
@@ -36,7 +40,7 @@ const PurchasesDashboard = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <Chatbot sessionId={userData?._id || 'default'} />
+      <Chatbot sessionId={`${userData?._id || 'default'}-achats`} allowedTopics={allowedTopics} />
       <div className="main-content">
         <TopNavbar />
         <div className="page-container">
@@ -50,7 +54,7 @@ const PurchasesDashboard = () => {
             <div className="powerbi-header">
               <h2>Dashboard Achats — Power BI</h2>
               <button onClick={() => setRefreshKey(k => k + 1)} style={refreshBtnStyle}>
-                🔄 Actualiser
+                 Actualiser
               </button>
             </div>
 
@@ -79,7 +83,7 @@ const PurchasesDashboard = () => {
   );
 };
 
-const refreshBtnStyle = { padding: '6px 14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' };
+const refreshBtnStyle = { padding: '6px 14px', background: '#283953', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' };
 const centerStyle = { width: '100%', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', background: '#f8f9fa' };
 
 export default PurchasesDashboard;

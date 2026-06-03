@@ -5,18 +5,18 @@ const AGENT_BASE_URL = import.meta.env.VITE_AGENT_API_URL || "http://localhost:8
 
 const agentAxios = axios.create({
   baseURL: AGENT_BASE_URL,
-  timeout: 60000, // 60s — Gemini peut être lent
+  timeout: 60000,
 });
 
-export const sendMessageToAgent = async (message, sessionId = "default") => {
+export const sendMessageToAgent = async (message, sessionId = "default", allowedTopics = []) => {
   try {
     const response = await agentAxios.post("/chat", {
       message,
       session_id: sessionId,
+      allowed_topics: allowedTopics,
     });
     return response.data;
   } catch (error) {
-    // Erreur réseau (serveur Python éteint, timeout...)
     if (error.code === "ECONNREFUSED" || error.code === "ERR_NETWORK") {
       return {
         response: {

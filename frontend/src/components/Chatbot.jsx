@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { sendMessageToAgent, clearAgentSession } from '../api/agentApi';
 import '../styles/Chatbot.css';
 
-const Chatbot = ({ sessionId = 'default' }) => {
+const Chatbot = ({ sessionId = 'default', allowedTopics = [] }) => {
   const [ouvert, setOuvert] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -47,7 +47,7 @@ const Chatbot = ({ sessionId = 'default' }) => {
     setLoading(true);
 
     try {
-      const data = await sendMessageToAgent(texteUser, sessionId);
+      const data = await sendMessageToAgent(texteUser, sessionId, allowedTopics);
       const response = data.response;
 
       setMessages(prev => [...prev, {
@@ -83,7 +83,7 @@ const Chatbot = ({ sessionId = 'default' }) => {
     setLoading(true);
 
     try {
-      const data = await sendMessageToAgent(lastUserMessage, sessionId);
+      const data = await sendMessageToAgent(lastUserMessage, sessionId, allowedTopics);
       const response = data.response;
 
       setMessages(prev => [...prev, {
@@ -160,45 +160,40 @@ const Chatbot = ({ sessionId = 'default' }) => {
               key={msg.id}
               className={`chatbot-msg ${msg.expediteur === 'user' ? 'msg-user' : 'msg-bot'}`}
             >
-             {msg.success === false ? (
-  <div className="error-message">
-    <div className="error-card">
-
-      {/* Icône selon le type d'erreur */}
-      <div className="error-icon-big">
-        {msg.errorType === "quota_exceeded" && "⏳"}
-        {msg.errorType === "server_offline" && "🔌"}
-        {msg.errorType === "timeout"        && "⌛"}
-        {msg.errorType === "technical_error" && "⚠️"}
-        {!msg.errorType                      && "❌"}
-      </div>
-
-      {/* Titre selon le type */}
-      <div className="error-title">
-        {msg.errorType === "quota_exceeded"  && "Service temporairement surchargé"}
-        {msg.errorType === "server_offline"  && "Serveur IA hors ligne"}
-        {msg.errorType === "timeout"         && "Délai d'attente dépassé"}
-        {msg.errorType === "technical_error" && "Erreur technique"}
-        {!msg.errorType                      && "Une erreur est survenue"}
-      </div>
-
-      <div className="error-text">{msg.texte}</div>
-
-      {/* Bouton retry pour les cas récupérables */}
-      {(msg.errorType === "quota_exceeded" || msg.errorType === "timeout") && (
-        <button
-          className="retry-btn"
-          onClick={handleRetry}
-          disabled={loading}
-        >
-          🔄 Réessayer
-        </button>
-      )}
-    </div>
-  </div>
-) : (
-  <span style={{ whiteSpace: 'pre-wrap' }}>{msg.texte}</span>
-)}
+              {msg.success === false ? (
+                <div className="error-message">
+                  <div className="error-card">
+                    <div className="error-icon-big">
+                      {msg.errorType === "quota_exceeded"  && "⏳"}
+                      {msg.errorType === "server_offline"  && "🔌"}
+                      {msg.errorType === "timeout"         && "⌛"}
+                      {msg.errorType === "technical_error" && "⚠️"}
+                      {msg.errorType === "access_denied"   && "🔒"}
+                      {!msg.errorType                      && "❌"}
+                    </div>
+                    <div className="error-title">
+                      {msg.errorType === "quota_exceeded"  && "Service temporairement surchargé"}
+                      {msg.errorType === "server_offline"  && "Serveur IA hors ligne"}
+                      {msg.errorType === "timeout"         && "Délai d'attente dépassé"}
+                      {msg.errorType === "technical_error" && "Erreur technique"}
+                      {msg.errorType === "access_denied"   && "Accès non autorisé"}
+                      {!msg.errorType                      && "Une erreur est survenue"}
+                    </div>
+                    <div className="error-text">{msg.texte}</div>
+                    {(msg.errorType === "quota_exceeded" || msg.errorType === "timeout") && (
+                      <button
+                        className="retry-btn"
+                        onClick={handleRetry}
+                        disabled={loading}
+                      >
+                        🔄 Réessayer
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <span style={{ whiteSpace: 'pre-wrap' }}>{msg.texte}</span>
+              )}
 
               {msg.sqlQuery && msg.success && (
                 <details style={{ marginTop: '10px', fontSize: '11px', opacity: 0.75 }}>

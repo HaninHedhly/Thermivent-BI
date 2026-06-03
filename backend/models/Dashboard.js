@@ -22,4 +22,4 @@ const dashboardSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model('Dashboard', dashboardSchema);
+module.exports = mongoose.model('Dashboard', dashboardSchema); 

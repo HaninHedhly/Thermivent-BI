@@ -40,7 +40,7 @@ exports.getDashboardByType = async (req, res) => {
       Stock:      isAdmin || access.stocks,
       Production: isAdmin || access.production,
     };
-
+ 
     if (!accessMap[type]) {
       return res.status(403).json({ success: false, message: 'Accès refusé' });
     }
@@ -54,34 +54,6 @@ exports.getDashboardByType = async (req, res) => {
     res.json({ success: true, data: dashboard });
   } catch (err) {
     console.error('getDashboardByType error:', err.message);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-};
-
-// PUT /api/dashboards/:type  (Admin seulement)
-// Modifier le lien Power BI d'un dashboard
-exports.updateDashboard = async (req, res) => {
-  try {
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ success: false, message: 'Admin seulement' });
-    }
-
-    const { type } = req.params;
-    const { lienPowerBI, titre } = req.body;
-
-    const dashboard = await Dashboard.findOneAndUpdate(
-      { type },
-      { lienPowerBI, titre },
-      { new: true }
-    );
-
-    if (!dashboard) {
-      return res.status(404).json({ success: false, message: 'Dashboard introuvable' });
-    }
-
-    res.json({ success: true, data: dashboard });
-  } catch (err) {
-    console.error('updateDashboard error:', err.message);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };

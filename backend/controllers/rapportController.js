@@ -7,7 +7,7 @@ exports.getRapports = async (req, res) => {
     const user = req.user;
     const access = user.access || {};
     const isAdmin = user.role === 'Admin';
-
+ 
     const typesAutorises = [];
     if (isAdmin || access.ventes)     typesAutorises.push('Ventes');
     if (isAdmin || access.achats)     typesAutorises.push('Achats');
@@ -63,34 +63,6 @@ exports.getRapportByType = async (req, res) => {
     res.json({ success: true, data: rapport });
   } catch (err) {
     console.error('getRapportByType error:', err.message);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-};
-
-// PUT /api/rapports/:type  (Admin seulement)
-// Modifier le lien Power BI d'un rapport
-exports.updateRapport = async (req, res) => {
-  try {
-    if (req.user.role !== 'Admin') {
-      return res.status(403).json({ success: false, message: 'Admin seulement' });
-    }
-
-    const { type } = req.params;
-    const { lienPowerBI, titre } = req.body;
-
-    const rapport = await Rapport.findOneAndUpdate(
-      { type },
-      { lienPowerBI, titre },
-      { new: true }
-    );
-
-    if (!rapport) {
-      return res.status(404).json({ success: false, message: 'Rapport introuvable' });
-    }
-
-    res.json({ success: true, data: rapport });
-  } catch (err) {
-    console.error('updateRapport error:', err.message);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-const TopNavbar = () => {
+const TopNavbar = ({ showSearch = false, searchValue = '', onSearch = () => {}, searchPlaceholder = 'Rechercher...' }) => {
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const isAdmin = userData.role === 'Admin';
   const [notifications, setNotifications] = useState([]);
   const [showMenu, setShowMenu] = useState(false);
 
-  // 1. Récupérer les notifications
   const fetchNotifs = async () => {
     if (!isAdmin) return;
     try {
-      const res = await fetch('http://localhost:5000/api/notifications'); // Ajustez l'URL
+      const res = await fetch('http://localhost:5000/api/notifications');
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);
@@ -22,18 +21,16 @@ const TopNavbar = () => {
 
   useEffect(() => {
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 30000); // Check toutes les 30s
+    const interval = setInterval(fetchNotifs, 30000);
     return () => clearInterval(interval);
   }, [isAdmin]);
 
-  // 2. Marquer une notification comme lue
   const handleMarkAsRead = async (id) => {
     try {
       const res = await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
         method: 'PUT',
       });
       if (res.ok) {
-        // On retire localement la notification de la liste
         setNotifications(notifications.filter(n => n._id !== id));
       }
     } catch (err) {
@@ -42,15 +39,22 @@ const TopNavbar = () => {
   };
 
   return (
-    <div className="top-navbar">
-      <div className="search-container">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" placeholder="Rechercher..." className="search-input" />
-      </div>
-
+    <div className="top-navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      {showSearch && (
+        <div className="search-container">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder={searchPlaceholder}
+            className="search-input"
+            value={searchValue}
+            onChange={e => onSearch(e.target.value)}
+          />
+        </div>
+      )}
       <div className="top-right" style={{ display: 'flex', alignItems: 'center' }}>
         
         {/* LA CLOCHE : Admin Uniquement */}
@@ -77,15 +81,12 @@ const TopNavbar = () => {
               )}
             </div>
 
-            {/* Menu déroulant des notifications */}
             {showMenu && (
               <>
-                {/* Overlay invisible pour fermer le menu en cliquant ailleurs */}
                 <div 
                     style={{ position: 'fixed', inset: 0, zIndex: 90 }} 
                     onClick={() => setShowMenu(false)} 
                 />
-                
                 <div style={{ 
                   position: 'absolute', top: '45px', right: '0', 
                   width: '320px', background: 'white', 
@@ -97,7 +98,6 @@ const TopNavbar = () => {
                     <h5 style={{ margin: 0, color: '#0F2038', fontSize: '15px' }}>Alertes Utilisateurs</h5>
                     <span style={{ fontSize: '11px', color: '#64748B' }}>{notifications.length} nouvelles</span>
                   </div>
-
                   <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
                     {notifications.length === 0 ? (
                       <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>

@@ -48,6 +48,7 @@ const Profile = () => {
     name:        storedUser.name        || '',
     email:       storedUser.email       || '',
     phone:       storedUser.phone       || '',
+    ancienMotDePasse:    '',
     motDePasse:       '',
     confirmerMotDePasse: '',
     photo:       storedUser.photo       || '',

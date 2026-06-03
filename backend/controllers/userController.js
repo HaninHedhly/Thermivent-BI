@@ -1,6 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
+// Comptes protégés — ne peuvent jamais être modifiés ou supprimés
+const PROTECTED_EMAILS = ['admin@thermivent.com', 'leila.makni@thermivent.com'];
+
 // GET tous les utilisateurs
 exports.getUsers = async (req, res) => {
   try {
@@ -45,16 +48,17 @@ exports.updateUser = async (req, res) => {
     const user = await User.findById(req.params.id).select('+motDePasse');
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
-    // Empêcher le changement de rôle de l'admin principal
-    if (user.email === 'admin@thermivent.com' && role && role !== 'Admin') {
-      return res.status(403).json({ message: 'Impossible de modifier le rôle du compte admin principal' });
+    // Bloquer toute modification des comptes protégés
+    if (PROTECTED_EMAILS.includes(user.email)) {
+      return res.status(403).json({ 
+        message: `Le compte ${user.email} est protégé et ne peut pas être modifié.` 
+      });
     }
 
     if (motDePasse) {
       if (!ancienMotDePasse) {
         return res.status(400).json({ message: "L'ancien mot de passe est requis." });
       }
-
       const estValide = await bcrypt.compare(ancienMotDePasse, user.motDePasse);
       if (!estValide) {
         return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
@@ -62,12 +66,12 @@ exports.updateUser = async (req, res) => {
       user.motDePasse = motDePasse;
     }
 
-    if (name) user.name = name;
-    if (email) user.email = email;
+    if (name)             user.name   = name;
+    if (email)            user.email  = email;
     if (phone !== undefined) user.phone = phone;
     if (photo !== undefined) user.photo = photo;
-    if (role) user.role = role;
-    if (access) user.access = access;
+    if (role)             user.role   = role;
+    if (access)           user.access = access;
 
     await user.save();
     const response = user.toObject();
@@ -85,8 +89,11 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
 
-    if (user.email === 'admin@thermivent.com') {
-      return res.status(403).json({ message: 'Impossible de supprimer le compte admin principal' });
+    // Bloquer la suppression des comptes protégés
+    if (PROTECTED_EMAILS.includes(user.email)) {
+      return res.status(403).json({ 
+        message: `Le compte ${user.email} est protégé et ne peut pas être supprimé.` 
+      });
     }
 
     await User.findByIdAndDelete(req.params.id);

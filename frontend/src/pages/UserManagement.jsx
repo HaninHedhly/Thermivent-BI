@@ -4,6 +4,7 @@ import { fetchUsers, createUser, updateUser, deleteUser } from '../api/userApi';
 import Sidebar from '../components/Sidebar';
 import FilterDrawer from '../components/FilterDrawer';
 import Chatbot from '../components/Chatbot';
+import TopNavbar from '../components/TopNavbar';
 import '../styles/Web.css';
 import '../styles/UserManagement.css';
 
@@ -279,20 +280,7 @@ const UserManagement = () => {
       <Chatbot sessionId="admin-user-management" />
 
       <div className="main-content">
-        <div className="top-navbar">
-          <div className="search-container">
-            <Icons.Search />
-            <input type="text" placeholder="Rechercher un utilisateur..." className="search-input"
-              value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <div className="top-right">
-            <div className="bell-icon"><Icons.Bell /></div>
-            <div className="user-profile">
-              <img src="https://ui-avatars.com/api/?name=Admin+User&background=FDBA74&color=fff" alt="User" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-              <div className="user-info"><p>Admin User</p><span>admin@thermivent.com</span></div>
-            </div>
-          </div>
-        </div>
+        <TopNavbar showSearch searchValue={search} onSearch={setSearch} searchPlaceholder="Rechercher un utilisateur..." />
 
         <div className="page-container">
           <div className="page-header">
@@ -389,7 +377,7 @@ const UserManagement = () => {
                     </td>
                     <td>
                       {/* Masquer les boutons pour tous les Admins */}
-                      {user.role !== 'Admin' && (
+                      {user.email !== 'leila.makni@thermivent.com' && (
                         <>
                           <button className="action-btn" onClick={() => openEditModal(user)}>
                             <Icons.Edit />
