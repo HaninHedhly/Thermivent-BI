@@ -3,11 +3,12 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
-const connectDB = require('./config/db');   // Assurez-vous que le chemin est correct
+const connectDB = require('./config/db');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
-// ── Middlewares ──
+// ── Middlewares ──────────────────────────────────────────────────
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
@@ -17,24 +18,30 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// ── Routes ──
-// Important : on déclare les routes AVANT de démarrer le serveur
+// ── Routes existantes ────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/notifications', notificationRoutes);
+
+// ──  routes Power BI ────────────────────────────────────
+app.use('/api/dashboards', require('./routes/dashboardRoutes'));
+app.use('/api/rapports', require('./routes/rapportRoutes'));
 
 app.get('/', (req, res) => res.send('Thermivent BI API running'));
 
-// ── Connexion DB + Démarrage du serveur ──
+// ── Connexion DB + Démarrage du serveur ──────────────────────────
 const startServer = async () => {
   try {
-    await connectDB();                    // ← On attend que MongoDB soit connecté
+    await connectDB();
+
     console.log('✅ MongoDB connecté avec succès');
 
     const PORT = process.env.PORT || 5000;
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
+
   } catch (error) {
     console.error('❌ Erreur fatale lors du démarrage :', error.message);
     process.exit(1);

@@ -1,0 +1,25 @@
+const mongoose = require('mongoose');
+
+const dashboardSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Ventes', 'Achats', 'Stock', 'Production'],
+    required: true,
+    unique: true,
+  },
+  titre: {
+    type: String,
+    required: true,
+  },
+  lienPowerBI: {
+    type: String,
+    required: true,
+  },
+  idUtilisateur: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+}, { timestamps: true });
+
+module.exports = mongoose.model('Dashboard', dashboardSchema);

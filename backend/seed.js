@@ -12,7 +12,7 @@ const seedAdmin = async () => {
     console.log('✓ MongoDB connecté');
 
     // Supprimer l'ancien admin s'il existe
-    await User.deleteOne({ email: 'admin@thermivent.com' });
+    await User.deleteOne({ email: 'leila.makni@thermivent.com' });
     console.log('✓ Ancien admin supprimé (si existait)');
 
     // Créer le nouvel admin
@@ -20,16 +20,16 @@ const seedAdmin = async () => {
     // et mettre access = true sur tout car role = 'Admin'
     const admin = await User.create({
       name:       'Admin Thermivent',
-      email:      'admin@thermivent.com',
+      email:      'leila.makni@thermivent.com',
       phone:      '00000000',
       role:       'Admin',
-      motDePasse: 'admin123',
+      motDePasse: 'lailamakni123',
     });
 
     console.log('\n✅ Compte admin créé avec succès !');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('  Email    : admin@thermivent.com');
-    console.log('  Password : admin123');
+    console.log('  Email    : leila.makni@thermivent.com');
+    console.log('  Password : leilamakni123');
     console.log('  Rôle     : Admin (accès total)');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
