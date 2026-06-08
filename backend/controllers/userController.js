@@ -56,16 +56,21 @@ exports.updateUser = async (req, res) => {
     }
 
     if (motDePasse) {
-      if (!ancienMotDePasse) {
-        return res.status(400).json({ message: "L'ancien mot de passe est requis." });
-      }
-      const estValide = await bcrypt.compare(ancienMotDePasse, user.motDePasse);
-      if (!estValide) {
-        return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
-      }
-      user.motDePasse = motDePasse;
+  const estSonPropheCompte = req.user._id.toString() === req.params.id;
+  
+  if (estSonPropheCompte) {
+    // L'utilisateur modifie son propre compte → ancien mdp requis
+    if (!ancienMotDePasse) {
+      return res.status(400).json({ message: "L'ancien mot de passe est requis." });
     }
-
+    const estValide = await bcrypt.compare(ancienMotDePasse, user.motDePasse);
+    if (!estValide) {
+      return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
+    }
+  }
+  // Sinon c'est un Admin qui modifie quelqu'un d'autre → pas de vérification
+  user.motDePasse = motDePasse;
+}
     if (name)             user.name   = name;
     if (email)            user.email  = email;
     if (phone !== undefined) user.phone = phone;

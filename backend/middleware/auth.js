@@ -31,7 +31,7 @@ const proteger = async (req, res, next) => {
 
 // Middleware vérification rôle admin
 const adminSeulement = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'Admin') {
     return res.status(403).json({
       success: false,
       message: 'Accès refusé - Admin seulement',
