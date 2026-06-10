@@ -7,6 +7,10 @@ import '../styles/Dashboard.css';
 
 const SalesDashboard = () => {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  // Topics autorisés dérivés des accès réels de l'utilisateur
+  const allowedTopics = Object.entries(userData?.access || {})
+    .filter(([, v]) => v === true)
+    .map(([k]) => k === 'stocks' ? 'stock' : k);
   const isAdmin  = userData?.role === 'Admin';
 
   const [dashboard, setDashboard]   = useState(null);
@@ -38,7 +42,7 @@ const SalesDashboard = () => {
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <Chatbot sessionId={userData?._id || 'default'} />
+      <Chatbot sessionId={`${userData?._id || 'default'}-ventes`} allowedTopics={allowedTopics} />
       <div className="main-content">
         <TopNavbar />
         <div className="page-container">
@@ -55,7 +59,7 @@ const SalesDashboard = () => {
                 onClick={() => setRefreshKey(k => k + 1)}
                 style={refreshBtnStyle}
               >
-                🔄 Actualiser
+                 Actualiser
               </button>
             </div>
 
@@ -94,7 +98,7 @@ const SalesDashboard = () => {
 
 const refreshBtnStyle = {
   padding: '6px 14px',
-  background: '#3B82F6',
+  background: '#283953',
   color: 'white',
   border: 'none',
   borderRadius: '6px',

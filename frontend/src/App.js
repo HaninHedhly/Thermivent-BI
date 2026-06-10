@@ -10,6 +10,7 @@ import Rapports            from './pages/Rapports';
 import Profile             from './pages/Profile';
 import './App.css';
 
+
 const getUser  = () => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } };
 const getToken = () => localStorage.getItem('token');
 

@@ -44,7 +44,8 @@ userSchema.pre('save', function () {
 });
 
 // Vérifier mot de passe
-userSchema.methods.verifierMotDePasse = async function (motDePasseSaisi) {
+userSchema.methods.verifierMotDePasse = 
+async function (motDePasseSaisi) {
   return await bcrypt.compare(motDePasseSaisi, this.motDePasse);
 };
 

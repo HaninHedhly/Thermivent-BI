@@ -60,6 +60,46 @@ const login = async (req, res) => {
   }
 };
 
+// @desc    Mettre à jour son propre profil
+// @route   PUT /api/auth/me
+// @access  Private (tout utilisateur connecté)
+const updateMe = async (req, res) => {
+  try {
+    const { ancienMotDePasse, motDePasse, name, email, phone, photo } = req.body;
+
+    const user = await User.findById(req.user._id).select('+motDePasse');
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+
+    // Changement de mot de passe
+    if (motDePasse) {
+      if (!ancienMotDePasse)
+        return res.status(400).json({ message: "L'ancien mot de passe est requis." });
+
+      const estValide = await require('bcryptjs').compare(ancienMotDePasse, user.motDePasse);
+      if (!estValide)
+        return res.status(400).json({ message: "L'ancien mot de passe est incorrect." });
+
+      user.motDePasse = motDePasse;
+    }
+
+    if (name)              user.name  = name;
+    if (email)             user.email = email;
+    if (phone !== undefined) user.phone = phone;
+    if (photo !== undefined) user.photo = photo;
+    // ⚠️ On ne touche PAS role ni access ici — sécurité
+
+    await user.save();
+
+    const response = user.toObject();
+    delete response.motDePasse;
+    res.status(200).json({ success: true, user: response });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
+
 // @desc    Obtenir utilisateur connecté
 // @route   GET /api/auth/me
 // @access  Private
@@ -72,4 +112,4 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { login, getMe };
+module.exports = { login, getMe, updateMe };

@@ -48,6 +48,7 @@ const Profile = () => {
     name:        storedUser.name        || '',
     email:       storedUser.email       || '',
     phone:       storedUser.phone       || '',
+    ancienMotDePasse:    '',
     motDePasse:       '',
     confirmerMotDePasse: '',
     photo:       storedUser.photo       || '',
@@ -124,7 +125,7 @@ const [showOldPwd, setShowOldPwd] = useState(false);
     setChargement(true);
     try {
       // On envoie ancienMotDePasse et motDePasse au serveur
-      const res = await axios.put(`/users/${storedUser.id}`, dataToSend);
+      const res = await axios.put('/auth/me', dataToSend);
 
       const updatedUser = {
         ...storedUser,
