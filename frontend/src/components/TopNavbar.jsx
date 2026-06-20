@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getNotifications, markAsRead } from '../api/notificationApi';
+import { getNotifications, deleteNotification } from '../api/notificationApi';
 
 const TopNavbar = ({ showSearch = false, searchValue = '', onSearch = () => {}, searchPlaceholder = 'Rechercher...' }) => {
   const userData = JSON.parse(localStorage.getItem('user')) || {};
@@ -24,18 +24,20 @@ setNotifications(res.data); // Axios met le résultat dans .data
     return () => clearInterval(interval);
   }, [isAdmin]);
 
- const handleMarkAsRead = async (id) => {
+const handleMarkAsRead = async (id) => {
   try {
-    const token = localStorage.getItem('token'); // ← ajouter
-   const res = await markAsRead(id);
-    if (res.ok) {
-      setNotifications(notifications.filter(n => n._id !== id));
-    }
+    console.log('🔔 Clic sur notification id:', id);
+    const res = await deleteNotification(id);
+    console.log('✅ Réponse serveur:', res);
+    setNotifications(prev => {
+      const updated = prev.filter(n => n._id !== id);
+      console.log('📋 Notifications restantes:', updated.length);
+      return updated;
+    });
   } catch (err) {
-    console.error("Erreur marquage lu:", err);
+    console.error('❌ Erreur:', err.response?.status, err.response?.data);
   }
 };
-
   return (
     <div className="top-navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
       {showSearch && (

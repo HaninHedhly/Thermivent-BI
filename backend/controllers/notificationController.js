@@ -27,15 +27,11 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
-// Marquer comme lu
-exports.markAsRead = async (req, res) => {
+// Supprimer la notification (au lieu de markAsRead)
+exports.deleteNotification = async (req, res) => {
   try {
-    const notification = await Notification.findByIdAndUpdate(
-      req.params.id, 
-      { isRead: true }, 
-      { new: true }
-    );
-    res.status(200).json(notification);
+    await Notification.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

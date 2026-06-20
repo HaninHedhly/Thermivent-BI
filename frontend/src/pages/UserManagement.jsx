@@ -462,7 +462,7 @@ const UserManagement = () => {
                 </div>
 
                 {/* Mot de passe + Confirmation */}
-                
+
                 <div style={{ marginBottom: '15px' }}>
                   <label style={LS}>
                     Mot de passe {!currentUser && <span style={{ color: '#EF4444' }}>*</span>}

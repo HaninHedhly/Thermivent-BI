@@ -37,24 +37,24 @@ const Rapports = () => {
 
   // Filtrage des onglets selon la recherche
   // Mots-clés mappés aux types de rapports
-  const SEARCH_ALIASES = {
-    ventes:     ['vente', 'ventes', 'sales', 'ca', 'chiffre'],
-    achats:     ['achat', 'achats', 'purchase', 'fournisseur'],
-    production: ['production', 'fabrication', 'of'],
-    stock:      ['stock', 'stocks', 'inventaire'],
-  };
+const SEARCH_ALIASES = {
+  ventes:     ['vente', 'ventes', 'sales', 'ca', 'chiffre'],
+  achats:     ['achat', 'achats', 'purchase', 'fournisseur'],
+  production: ['production', 'fabrication', 'of'],
+  stock:      ['stock', 'stocks', 'inventaire'],
+};
 
-  const filteredRapports = rapports.filter(rapport => {
-    if (!search.trim()) return true;
-    const q = search.trim().toLowerCase();
-    // Match sur le titre directement
-    if (rapport.titre.toLowerCase().includes(q)) return true;
-    // Match sur le type directement
-    if (rapport.type.toLowerCase().includes(q)) return true;
-    // Match via les alias
-    const aliases = SEARCH_ALIASES[rapport.type.toLowerCase()] || [];
-    return aliases.some(alias => alias.includes(q) || q.includes(alias));
-  });
+const filteredRapports = rapports.filter(rapport => {
+  if (!search.trim()) return true;
+  const q = search.trim().toLowerCase();
+
+  if (rapport.titre.toLowerCase().includes(q)) return true;
+  if (rapport.type.toLowerCase().includes(q)) return true;
+
+  const aliases = SEARCH_ALIASES[rapport.type.toLowerCase()] || [];
+  // Exact match OU alias qui commence par la query (pas l'inverse)
+  return aliases.some(alias => alias === q || alias.startsWith(q));
+});
 
   // Si le tab actif n'est plus visible après filtrage, passer au premier visible
   const activeRapport = filteredRapports.find(r => r.type === activeTab)

@@ -8,6 +8,6 @@ const { proteger } = require('../middleware/auth');
 
 router.post('/', notificationController.sendNotification);
 router.get('/',proteger, notificationController.getNotifications);
-router.put('/:id/read',proteger, notificationController.markAsRead);
+router.delete('/:id', proteger, notificationController.deleteNotification);
 
 module.exports = router;
