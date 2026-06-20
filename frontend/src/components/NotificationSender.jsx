@@ -24,7 +24,7 @@ const NotificationSender = ({ section }) => {
           senderName:  user.name,
           senderEmail: user.email,
           message:     `[${section}] ${message}`,
-          type:        section,           // ← section correcte envoyée
+          type:        section,           
         }),
       });
 

@@ -1,29 +1,5 @@
 const Dashboard = require('../models/Dashboard');
 
-// GET /api/dashboards
-// Retourne tous les dashboards (filtrés par accès utilisateur)
-exports.getDashboards = async (req, res) => {
-  try {
-    const user = req.user;
-    const access = user.access || {};
-    const isAdmin = user.role === 'Admin';
-
-    // Construire la liste des types autorisés
-    const typesAutorises = [];
-    if (isAdmin || access.ventes)     typesAutorises.push('Ventes');
-    if (isAdmin || access.achats)     typesAutorises.push('Achats');
-    if (isAdmin || access.stocks)     typesAutorises.push('Stock');
-    if (isAdmin || access.production) typesAutorises.push('Production');
-
-    const dashboards = await Dashboard.find({ type: { $in: typesAutorises } });
-
-    res.json({ success: true, data: dashboards });
-  } catch (err) {
-    console.error('getDashboards error:', err.message);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
-};
-
 // GET /api/dashboards/:type
 // Retourne un dashboard par type (ex: Ventes)
 exports.getDashboardByType = async (req, res) => {

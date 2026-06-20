@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 
 // Comptes protégés — ne peuvent jamais être modifiés ou supprimés
 const PROTECTED_EMAILS = [
-  'admin@thermivent.com',
   'leila.makni@thermivent.com'
 ];
 

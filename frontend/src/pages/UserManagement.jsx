@@ -1,5 +1,6 @@
 // src/pages/UserManagement.jsx
 import React, { useState, useEffect, useMemo } from 'react';
+import * as XLSX from 'xlsx';
 import { fetchUsers, createUser, updateUser, deleteUser } from '../api/userApi';
 import Sidebar from '../components/Sidebar';
 import FilterDrawer from '../components/FilterDrawer';
@@ -126,17 +127,18 @@ const UserManagement = () => {
     };
   };
 
-  const handleExportExcel = () => {
-    const csv = "data:text/csv;charset=utf-8,NOM,EMAIL,TÉLÉPHONE,RÔLE\n" +
-      filteredUsers.map(e => `${e.name||''},${e.email||''},${e.phone||''},${e.role||''}`).join('\n');
-    const link = document.createElement('a');
-    link.setAttribute('href', encodeURI(csv));
-    link.setAttribute('download', 'utilisateurs.csv');
-    document.body.appendChild(link); 
-    link.click(); 
-    link.remove();
-  };
-
+ const handleExportExcel = () => {
+  const data = filteredUsers.map(u => ({
+    NOM: u.name || '',
+    EMAIL: u.email || '',
+    TÉLÉPHONE: u.phone || '',
+    RÔLE: u.role || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Utilisateurs');
+  XLSX.writeFile(wb, 'utilisateurs.xlsx');
+};
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;

@@ -6,10 +6,6 @@ const {
   getDashboardByType,
 } = require('../controllers/dashboardController');
 
-// GET  /api/dashboards         → tous les dashboards autorisés
-// GET  /api/dashboards/:type   → un dashboard par type (Ventes, Achats, Stock, Production)
-
-router.get('/',      proteger, getDashboards);
 router.get('/:type', proteger, getDashboardByType);
 
 

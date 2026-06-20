@@ -43,6 +43,9 @@ const ModalSucces = ({ message, onClose }) => (
 // ── Composant principal ─────────────────────────────────────────
 const Profile = () => {
   const storedUser  = JSON.parse(localStorage.getItem('user') || '{}');
+  const allowedTopics = Object.entries(storedUser?.access || {})
+  .filter(([, v]) => v === true)
+  .map(([k]) => k === 'stocks' ? 'stock' : k);
 
   const [formData, setFormData] = useState({
     name:        storedUser.name        || '',
@@ -158,7 +161,10 @@ const [showOldPwd, setShowOldPwd] = useState(false);
   return (
     <div className="dashboard-layout">
       <Sidebar />
-      <Chatbot />
+      <Chatbot 
+  sessionId={`${storedUser?._id || 'default'}-profile`}
+  allowedTopics={allowedTopics}
+/>
 
       <div className="main-content">
         <TopNavbar />
